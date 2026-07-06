@@ -704,6 +704,7 @@
         const COVER_DEPTH = 0.040;
         const BEDDING_DEPTH = 0.030;
         const STACKABOX_HEIGHT = 0.150;
+        const SUMP_DEPTH = 0.150;
         const INVERT_OFFSET = 0.450;
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
@@ -745,13 +746,17 @@
             laserError.classList.remove('show');
             
             // Calculations
-            const beddingLevel = FINISHED_LEVEL - BEDDING_DEPTH;
-            const requiredDepth = FINISHED_LEVEL - BEDDING_DEPTH - ductLevel;
+            // beddingLevel = top of first stackabox = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH
+            const coverLevel = FINISHED_LEVEL - COVER_DEPTH;
+            const beddingLevel = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH;
+            const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / STACKABOX_HEIGHT);
             // Ensure at least 1 full stackabox unit sits below the duct
             const numUnits = Math.max(Math.ceil(requiredDepth / STACKABOX_HEIGHT), unitsAboveDuct + 2);
             const actualDepth = numUnits * STACKABOX_HEIGHT;
             const invertLevel = ductLevel - INVERT_OFFSET;
+            const sumpTopLevel = beddingLevel - actualDepth;
+            const sumpBottomLevel = sumpTopLevel - SUMP_DEPTH;
             
             // Update result cards
             document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
@@ -760,8 +765,9 @@
             
             // Build levels array
             const levels = [
-                { name: 'Finished Compound Level & Cover', level: FINISHED_LEVEL, type: 'finished' },
-                { name: 'Bedding Level', level: beddingLevel, type: 'bedding' },
+                { name: 'Finished Compound Level', level: FINISHED_LEVEL, type: 'finished' },
+                { name: 'Cover (B125) Underside', level: coverLevel, type: 'cover' },
+                { name: 'Bedding Level (Top of Stackaboxes)', level: beddingLevel, type: 'bedding' },
                 { name: 'Lowest Duct Level', level: ductLevel, type: 'duct' }
             ];
             
@@ -775,7 +781,8 @@
             }
             
             levels.push(
-                { name: 'Sump Unit (300×300×150)', level: beddingLevel - actualDepth, type: 'sump' },
+                { name: 'Sump Unit Top (300×300×150)', level: sumpTopLevel, type: 'sump' },
+                { name: 'Sump Unit Bottom', level: sumpBottomLevel, type: 'sump-bottom' },
                 { name: 'Drain/Invert Level (100×100)', level: invertLevel, type: 'drain' }
             );
             
@@ -793,10 +800,10 @@
             }).join('');
             
             // Draw cross-section
-            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel);
+            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel);
         }
         
-        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel) {
+        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel) {
             pitDrawing.innerHTML = '';
             
             // Ground level
@@ -805,17 +812,14 @@
             ground.innerHTML = `<div class="ground-level">FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD</div>`;
             pitDrawing.appendChild(ground);
             
-            // Add cover + bedding combined
-            const coverBeddingRow = document.createElement('div');
-            coverBeddingRow.className = 'component-row';
-            const totalCoverBedding = FINISHED_LEVEL - beddingLevel;
-            coverBeddingRow.innerHTML = `
-                <div class="component cover" style="min-height: ${(totalCoverBedding * 200) + 'px'};">
-                    <div style="display: flex; flex-direction: column; gap: 5px; text-align: center;">
+            // Add cover (B125 lid) – from FL down to coverLevel
+            const coverRow = document.createElement('div');
+            coverRow.className = 'component-row';
+            coverRow.innerHTML = `
+                <div class="component cover" style="min-height: ${(COVER_DEPTH * 200) + 'px'};">
+                    <div style="text-align: center;">
                         <div>B125 Cover</div>
                         <div style="font-size: 10px;">(0.040m)</div>
-                        <div style="border-top: 1px solid white; padding-top: 5px; margin-top: 5px;">Bedding</div>
-                        <div style="font-size: 10px;">(0.030m)</div>
                     </div>
                 </div>
                 <div class="level-marker">
@@ -824,9 +828,27 @@
                     <div class="delta-value">Δ ${(laserDatum - FINISHED_LEVEL).toFixed(3)}</div>
                 </div>
             `;
-            pitDrawing.appendChild(coverBeddingRow);
+            pitDrawing.appendChild(coverRow);
             
-            // Add bedding level marker
+            // Add bedding layer – from coverLevel down to beddingLevel
+            const beddingRow = document.createElement('div');
+            beddingRow.className = 'component-row';
+            beddingRow.innerHTML = `
+                <div class="component bedding" style="min-height: ${(BEDDING_DEPTH * 200) + 'px'};">
+                    <div style="text-align: center;">
+                        <div>Bedding</div>
+                        <div style="font-size: 10px;">(0.030m)</div>
+                    </div>
+                </div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${coverLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - coverLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(beddingRow);
+            
+            // Add bedding level marker (top of first stackabox)
             const beddingMarkerRow = document.createElement('div');
             beddingMarkerRow.className = 'component-row';
             beddingMarkerRow.innerHTML = `
@@ -899,19 +921,31 @@
                 pitDrawing.appendChild(stackRow);
             }
             
-            // Add sump
+            // Add sump (top level marker + body + bottom level marker)
             const sumpRow = document.createElement('div');
             sumpRow.className = 'component-row';
-            const sumpLevel = beddingLevel - (numUnits * STACKABOX_HEIGHT);
             sumpRow.innerHTML = `
                 <div class="component sump">Sump 300×300×150</div>
                 <div class="level-marker">
                     <div class="level-line"></div>
-                    <div>${sumpLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - sumpLevel).toFixed(3)}</div>
+                    <div>${sumpTopLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - sumpTopLevel).toFixed(3)}</div>
                 </div>
             `;
             pitDrawing.appendChild(sumpRow);
+            
+            // Add sump bottom level marker
+            const sumpBottomRow = document.createElement('div');
+            sumpBottomRow.className = 'component-row';
+            sumpBottomRow.innerHTML = `
+                <div style="flex: 1; border-top: 2px dashed #764BA2; display: flex; align-items: center; padding: 5px; font-size: 10px; font-weight: 600; color: #764BA2;">Sump Bottom</div>
+                <div class="level-marker" style="color: #764BA2;">
+                    <div class="level-line" style="border-color: #764BA2;"></div>
+                    <div>${sumpBottomLevel.toFixed(3)}</div>
+                    <div class="delta-value" style="color: #764BA2; border-color: #764BA2;">Δ ${(laserDatum - sumpBottomLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(sumpBottomRow);
             
             // Add drain
             const drainRow = document.createElement('div');
