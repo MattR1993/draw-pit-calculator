@@ -689,7 +689,7 @@
                     <div class="result-card" id="digDepthCard">
                         <div class="result-label">Dig Depth</div>
                         <div class="result-value" id="digDepth">-</div>
-                        <div class="result-unit" id="digDepthUnit">m to excavate</div>
+                        <div class="result-unit" id="digDepthUnit">m</div>
                     </div>
                 </div>
                 
@@ -735,6 +735,11 @@
         const STACKABOX_HEIGHT = 0.150;
         const SUMP_DEPTH = 0.150;
         const INVERT_OFFSET = 0.450;
+        
+        // Cross-section display scale constants
+        const DIG_DEPTH_SCALE_PX_PER_M = 200;  // pixels per metre for dig depth indicator
+        const MIN_GROUND_HEIGHT_PX = 50;        // minimum height in px when dig depth > 0
+        const DEFAULT_GROUND_HEIGHT_PX = 20;    // height in px when current ground <= finished level
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -854,7 +859,7 @@
             // Current ground level indicator (green dashed line)
             if (!isNaN(currentGroundLevel)) {
                 const digDepth = currentGroundLevel - FINISHED_LEVEL;
-                const extraHeightPx = digDepth > 0 ? Math.max(50, digDepth * 200) : 20;
+                const extraHeightPx = digDepth > 0 ? Math.max(MIN_GROUND_HEIGHT_PX, digDepth * DIG_DEPTH_SCALE_PX_PER_M) : DEFAULT_GROUND_HEIGHT_PX;
                 const groundRow = document.createElement('div');
                 groundRow.className = 'current-ground-row';
                 groundRow.style.height = extraHeightPx + 'px';
