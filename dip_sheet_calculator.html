@@ -766,7 +766,7 @@
             ];
             
             for (let i = 1; i <= numUnits; i++) {
-                const stackBoxLevelTop = ductLevel - (i - 1) * STACKABOX_HEIGHT;
+                const stackBoxLevelTop = beddingLevel - (i - 1) * STACKABOX_HEIGHT;
                 levels.push({
                     name: `Stackabox Unit ${i}`,
                     level: stackBoxLevelTop,
@@ -775,7 +775,7 @@
             }
             
             levels.push(
-                { name: 'Sump Unit (300×300×150)', level: ductLevel - actualDepth, type: 'sump' },
+                { name: 'Sump Unit (300×300×150)', level: beddingLevel - actualDepth, type: 'sump' },
                 { name: 'Drain/Invert Level (100×100)', level: invertLevel, type: 'drain' }
             );
             
@@ -860,7 +860,7 @@
                 pitDrawing.appendChild(stackRow);
             }
             
-            // Draw the unit that the duct passes through (with duct core and duct level marker)
+            // Draw the unit that the duct passes through (with duct core and both level markers)
             const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
             const ductUnitRow = document.createElement('div');
             ductUnitRow.className = 'component-row';
@@ -869,28 +869,19 @@
                     <div class="duct-unit-content">
                         Stackabox Unit ${ductUnitIndex + 1}
                         <div class="duct-core">Duct Ø</div>
+                        <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
                 </div>
                 <div class="level-marker">
                     <div class="level-line"></div>
                     <div>${ductUnitTopLevel.toFixed(3)}</div>
                     <div class="delta-value">Δ ${(laserDatum - ductUnitTopLevel).toFixed(3)}</div>
+                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
+                    <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
+                    <div class="delta-value" style="color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
                 </div>
             `;
             pitDrawing.appendChild(ductUnitRow);
-            
-            // Add duct centre level marker (dashed line) after the duct unit top
-            const ductRow = document.createElement('div');
-            ductRow.className = 'component-row';
-            ductRow.innerHTML = `
-                <div style="flex: 1; border-top: 2px dashed #0066CC; display: flex; align-items: center; padding: 5px; font-size: 10px; font-weight: 600; color: #0066CC;">DUCT CENTRE</div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${ductLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(ductRow);
             
             // Draw any stackabox units BELOW the duct
             for (let i = ductUnitIndex + 1; i < numUnits; i++) {
@@ -911,7 +902,7 @@
             // Add sump
             const sumpRow = document.createElement('div');
             sumpRow.className = 'component-row';
-            const sumpLevel = ductLevel - (numUnits * STACKABOX_HEIGHT);
+            const sumpLevel = beddingLevel - (numUnits * STACKABOX_HEIGHT);
             sumpRow.innerHTML = `
                 <div class="component sump">Sump 300×300×150</div>
                 <div class="level-marker">
