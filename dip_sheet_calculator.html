@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draw Pit Dip Sheet Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .input-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .input-helper {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .input-section-divider {
+            height: 1px;
+            background: #ddd;
+            margin: 25px 0;
+        }
+        
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #667eea;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+        
+        .fixed-params {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .fixed-params h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #667eea;
+        }
+        
+        .fixed-param {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+        
+        .fixed-param:last-child {
+            border-bottom: none;
+        }
+        
+        .fixed-param-label {
+            color: #666;
+        }
+        
+        .fixed-param-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .cross-section {
+            background: #f0f4ff;
+            padding: 25px;
+            border-radius: 8px;
+            border-left: 4px solid #764ba2;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cross-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .diagram-container {
+            flex-grow: 1;
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+        }
+        
+        .diagram {
+            flex-grow: 1;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            position: relative;
+            min-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .level-marker {
+            position: absolute;
+            width: 100%;
+            border-top: 1px dashed #ccc;
+            padding: 5px 0;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .level-marker.active {
+            border-top: 2px solid #667eea;
+            background: #f0f4ff;
+            font-weight: 600;
+        }
+        
+        .level-label {
+            background: white;
+            padding: 0 8px;
+            font-size: 10px;
+            white-space: nowrap;
+            color: #333;
+        }
+        
+        .level-label.active {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .level-offset {
+            background: white;
+            padding: 2px 6px;
+            font-size: 9px;
+            white-space: nowrap;
+            color: #FF6B6B;
+            font-weight: 600;
+            border-radius: 2px;
+            border: 1px solid #FF6B6B;
+        }
+        
+        .component-box {
+            position: absolute;
+            width: 90%;
+            left: 5%;
+            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #667eea;
+            text-align: center;
+            padding: 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .component-box:hover {
+            background: linear-gradient(135deg, #e8eeff 0%, #dce4ff 100%);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .component-box.cover {
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFD9D9 100%);
+            border-color: #FF6B6B;
+            color: #FF6B6B;
+        }
+        
+        .component-box.cover:hover {
+            background: linear-gradient(135deg, #FFD9D9 0%, #FFC9C9 100%);
+        }
+        
+        .component-box.bedding {
+            background: linear-gradient(135deg, #FFE5CC 0%, #FFD9B3 100%);
+            border-color: #FFA500;
+            color: #FFA500;
+        }
+        
+        .component-box.bedding:hover {
+            background: linear-gradient(135deg, #FFD9B3 0%, #FFC99A 100%);
+        }
+        
+        .component-box.stackabox {
+            background: linear-gradient(135deg, #E5F3FF 0%, #D9EAFF 100%);
+            border-color: #4A90E2;
+            color: #4A90E2;
+        }
+        
+        .component-box.stackabox:hover {
+            background: linear-gradient(135deg, #D9EAFF 0%, #C9E0FF 100%);
+        }
+        
+        .component-box.sump {
+            background: linear-gradient(135deg, #E5E5FF 0%, #D9D9FF 100%);
+            border-color: #764BA2;
+            color: #764BA2;
+        }
+        
+        .component-box.sump:hover {
+            background: linear-gradient(135deg, #D9D9FF 0%, #C9C9FF 100%);
+        }
+        
+        .component-box.drain {
+            background: linear-gradient(135deg, #CCE5FF 0%, #B3D9FF 100%);
+            border-color: #0066CC;
+            color: #0066CC;
+        }
+        
+        .component-box.drain:hover {
+            background: linear-gradient(135deg, #B3D9FF 0%, #99CCFF 100%);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 2px solid;
+        }
+        
+        .results-section {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border-top: 4px solid #667eea;
+            grid-column: 1 / -1;
+        }
+        
+        .results-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #f0f4ff 100%);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-card.warning {
+            border-left-color: #FFA500;
+            background: linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%);
+        }
+        
+        .result-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .result-card.warning .result-value {
+            color: #FFA500;
+        }
+        
+        .result-unit {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+        
+        .dip-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .dip-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .dip-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        .dip-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .dip-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .dip-table .level {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .dip-table .component {
+            color: #555;
+        }
+        
+        .dip-table .offset {
+            font-weight: 600;
+            color: #FF6B6B;
+        }
+        
+        .error {
+            color: #FF6B6B;
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 8px;
+            background: #FFE5E5;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .laser-datum-highlight {
+            position: absolute;
+            width: 100%;
+            border-top: 3px solid #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 3px 0;
+            z-index: 1;
+        }
+        
+        .laser-datum-label {
+            position: absolute;
+            right: 5px;
+            background: #FF6B6B;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 700;
+            z-index: 2;
+        }
+        
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .diagram-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Draw Pit Dip Sheet Calculator</h1>
+            <p>Automatic calculation of Stackabox levels with B125 cover, bedding, and laser datum offsets</p>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <h2>Input Parameters</h2>
+                
+                <div class="section-title">Site Levels</div>
+                
+                <div class="input-group">
+                    <label for="ductLevel">Lowest Duct Level (mm AOD) *</label>
+                    <input type="number" id="ductLevel" placeholder="e.g., 5500" value="5500">
+                    <div class="input-helper">Enter the elevation of the lowest duct center</div>
+                    <div class="error" id="ductError"></div>
+                </div>
+                
+                <div class="input-section-divider"></div>
+                
+                <div class="section-title">Laser Datum (Rotating Laser Height)</div>
+                
+                <div class="input-group">
+                    <label for="laserDatum">Laser Datum Level (mm AOD)</label>
+                    <input type="number" id="laserDatum" placeholder="e.g., 6500" value="6500">
+                    <div class="input-helper">Height of rotating laser - for relative offset calculations</div>
+                    <div class="error" id="laserError"></div>
+                </div>
+                
+                <p style="font-size: 12px; color: #999; margin-top: 15px; font-style: italic;">
+                    💡 <strong>Tip:</strong> All level offsets in the DIP table will be calculated relative to the laser datum you set above.
+                </p>
+                
+                <div class="input-section-divider"></div>
+                
+                <div class="section-title">Fixed Parameters</div>
+                
+                <div class="fixed-params">
+                    <h3>Reference Levels</h3>
+                    <div class="fixed-param">
+                        <span class="fixed-param-label">Finished Compound Level</span>
+                        <span class="fixed-param-value">6100 mm AOD</span>
+                    </div>
+                    <div class="fixed-param">
+                        <span class="fixed-param-label">Cover Depth</span>
+                        <span class="fixed-param-value">40 mm</span>
+                    </div>
+                    <div class="fixed-param">
+                        <span class="fixed-param-label">Bedding Depth</span>
+                        <span class="fixed-param-value">30 mm</span>
+                    </div>
+                    <div class="fixed-param">
+                        <span class="fixed-param-label">Stackabox Unit Height</span>
+                        <span class="fixed-param-value">150 mm</span>
+                    </div>
+                    <div class="fixed-param">
+                        <span class="fixed-param-label">Invert Below Duct</span>
+                        <span class="fixed-param-value">450 mm</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cross-section">
+                <h2>Cross Section Diagram</h2>
+                <div class="diagram-container">
+                    <div class="diagram" id="diagram"></div>
+                    <div style="min-width: 120px;">
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #FFE5E5 0%, #FFD9D9 100%); border-color: #FF6B6B;"></div>
+                                <span>Cover</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #FFE5CC 0%, #FFD9B3 100%); border-color: #FFA500;"></div>
+                                <span>Bedding</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #E5F3FF 0%, #D9EAFF 100%); border-color: #4A90E2;"></div>
+                                <span>Stackabox</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #E5E5FF 0%, #D9D9FF 100%); border-color: #764BA2;"></div>
+                                <span>Sump 300x300</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: linear-gradient(135deg, #CCE5FF 0%, #B3D9FF 100%); border-color: #0066CC;"></div>
+                                <span>Drain 100x100</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: rgba(255, 107, 107, 0.2); border-color: #FF6B6B;"></div>
+                                <span>Laser Datum</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2>Calculation Results</h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Required Depth</div>
+                        <div class="result-value" id="requiredDepth">-</div>
+                        <div class="result-unit">mm</div>
+                    </div>
+                    <div class="result-card warning">
+                        <div class="result-label">Stackabox Units (Whole)</div>
+                        <div class="result-value" id="numUnits">-</div>
+                        <div class="result-unit">units @ 150mm each</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Actual Depth Built</div>
+                        <div class="result-value" id="actualDepth">-</div>
+                        <div class="result-unit">mm</div>
+                    </div>
+                </div>
+                
+                <table class="dip-table">
+                    <thead>
+                        <tr>
+                            <th>Level Description</th>
+                            <th>Elevation (mm AOD)</th>
+                            <th>Depth Below Finished</th>
+                            <th>Offset from Laser Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dipTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const FINISHED_LEVEL = 6100;
+        const COVER_DEPTH = 40;
+        const BEDDING_DEPTH = 30;
+        const STACKABOX_HEIGHT = 150;
+        const INVERT_OFFSET = 450;
+        
+        const ductLevelInput = document.getElementById('ductLevel');
+        const laserDatumInput = document.getElementById('laserDatum');
+        const diagram = document.getElementById('diagram');
+        const dipTableBody = document.getElementById('dipTableBody');
+        
+        function calculate() {
+            const ductLevel = parseFloat(ductLevelInput.value);
+            const laserDatum = parseFloat(laserDatumInput.value);
+            
+            // Validation
+            const ductError = document.getElementById('ductError');
+            const laserError = document.getElementById('laserError');
+            
+            if (isNaN(ductLevel)) {
+                ductError.textContent = 'Please enter a valid number';
+                ductError.classList.add('show');
+                return;
+            }
+            if (ductLevel >= FINISHED_LEVEL) {
+                ductError.textContent = 'Duct level must be below finished level (6100 mm AOD)';
+                ductError.classList.add('show');
+                return;
+            }
+            ductError.classList.remove('show');
+            
+            if (isNaN(laserDatum)) {
+                laserError.textContent = 'Please enter a valid laser datum level';
+                laserError.classList.add('show');
+                return;
+            }
+            if (laserDatum <= FINISHED_LEVEL) {
+                laserError.textContent = 'Laser datum should typically be above finished level';
+                laserError.classList.add('show');
+                return;
+            }
+            laserError.classList.remove('show');
+            
+            // Calculations
+            const coverTopLevel = FINISHED_LEVEL - COVER_DEPTH;
+            const beddingLevel = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH;
+            const requiredDepth = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH - ductLevel;
+            const numUnits = Math.ceil(requiredDepth / STACKABOX_HEIGHT);
+            const actualDepth = numUnits * STACKABOX_HEIGHT;
+            const stackBoxTop = ductLevel;
+            const stackBoxBottom = ductLevel - actualDepth;
+            const sumpTop = ductLevel - actualDepth;
+            const sumpBottom = ductLevel - actualDepth - STACKABOX_HEIGHT;
+            const invertLevel = ductLevel - INVERT_OFFSET;
+            
+            // Update result cards
+            document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(0);
+            document.getElementById('numUnits').textContent = numUnits;
+            document.getElementById('actualDepth').textContent = actualDepth.toFixed(0);
+            
+            // Build DIP table
+            const levels = [
+                { name: 'Finished Compound Level', level: FINISHED_LEVEL, depth: 0 },
+                { name: 'Cover Top Level (B125 Cover)', level: coverTopLevel, depth: COVER_DEPTH },
+                { name: 'Bedding Level', level: beddingLevel, depth: COVER_DEPTH + BEDDING_DEPTH },
+                { name: 'Lowest Duct Level', level: ductLevel, depth: FINISHED_LEVEL - ductLevel }
+            ];
+            
+            for (let i = 1; i <= numUnits; i++) {
+                const stackBoxLevelTop = ductLevel - (i - 1) * STACKABOX_HEIGHT;
+                const stackBoxLevelBottom = ductLevel - i * STACKABOX_HEIGHT;
+                levels.push({
+                    name: `Stackabox Unit ${i}`,
+                    level: stackBoxLevelTop,
+                    depth: FINISHED_LEVEL - stackBoxLevelTop,
+                    isRange: true,
+                    levelBottom: stackBoxLevelBottom
+                });
+            }
+            
+            levels.push(
+                { name: '300×300×150 Sump Unit', level: sumpTop, depth: FINISHED_LEVEL - sumpTop, isRange: true, levelBottom: sumpBottom },
+                { name: '100×100 Drain (Invert Level)', level: invertLevel, depth: FINISHED_LEVEL - invertLevel }
+            );
+            
+            dipTableBody.innerHTML = levels.map(lv => {
+                const offsetFromLaser = laserDatum - lv.level;
+                const offsetClass = offsetFromLaser >= 0 ? '' : 'style="color: #FF6B6B;"';
+                return `
+                    <tr>
+                        <td class="component">${lv.name}</td>
+                        <td class="level">${lv.level.toFixed(0)}</td>
+                        <td>${(FINISHED_LEVEL - lv.level).toFixed(0)} mm</td>
+                        <td class="offset" ${offsetClass}>${offsetFromLaser >= 0 ? '-' : '+'} ${Math.abs(offsetFromLaser).toFixed(0)} mm</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Draw diagram
+            drawDiagram(levels, FINISHED_LEVEL, laserDatum);
+        }
+        
+        function drawDiagram(levels, finishedLevel, laserDatum) {
+            diagram.innerHTML = '';
+            
+            const diagramHeight = 600;
+            const minLevel = levels[levels.length - 1].level;
+            const maxLevel = laserDatum + 200; // Add space above laser
+            const levelRange = maxLevel - minLevel;
+            
+            function getPixelHeight(level) {
+                return ((maxLevel - level) / levelRange) * diagramHeight;
+            }
+            
+            // Draw laser datum marker
+            if (laserDatum > minLevel && laserDatum < maxLevel) {
+                const laserPixelHeight = getPixelHeight(laserDatum);
+                const laserMarker = document.createElement('div');
+                laserMarker.className = 'laser-datum-highlight';
+                laserMarker.style.top = laserPixelHeight + 'px';
+                laserMarker.style.height = '3px';
+                
+                const laserLabel = document.createElement('div');
+                laserLabel.className = 'laser-datum-label';
+                laserLabel.style.top = (laserPixelHeight - 12) + 'px';
+                laserLabel.textContent = 'LASER DATUM';
+                
+                diagram.appendChild(laserMarker);
+                diagram.appendChild(laserLabel);
+            }
+            
+            // Draw level markers
+            levels.forEach((lv, index) => {
+                const pixelHeight = getPixelHeight(lv.level);
+                
+                const marker = document.createElement('div');
+                marker.className = 'level-marker' + (index <= 3 ? ' active' : '');
+                marker.style.top = pixelHeight + 'px';
+                
+                const label = document.createElement('div');
+                label.className = 'level-label' + (index <= 3 ? ' active' : '');
+                label.textContent = lv.level.toFixed(0);
+                
+                const offsetFromLaser = laserDatum - lv.level;
+                const offsetLabel = document.createElement('div');
+                offsetLabel.className = 'level-offset';
+                offsetLabel.textContent = (offsetFromLaser >= 0 ? '-' : '+') + Math.abs(offsetFromLaser).toFixed(0);
+                
+                marker.appendChild(label);
+                marker.appendChild(offsetLabel);
+                
+                diagram.appendChild(marker);
+            });
+            
+            // Draw component boxes
+            const componentGroups = [
+                { levels: [levels[0], levels[1]], name: 'B125 Cover', className: 'cover' },
+                { levels: [levels[1], levels[2]], name: 'Bedding', className: 'bedding' }
+            ];
+            
+            let stackBoxIndex = 0;
+            for (let i = 3; i < levels.length - 2; i++) {
+                const lv = levels[i];
+                if (lv.name.includes('Stackabox')) {
+                    componentGroups.push({
+                        levels: [lv, levels[i + 1] || lv],
+                        name: lv.name,
+                        className: 'stackabox'
+                    });
+                    stackBoxIndex++;
+                }
+            }
+            
+            // Add sump
+            const sumpLevel = levels[levels.length - 2];
+            componentGroups.push({
+                levels: [sumpLevel, levels[levels.length - 1]],
+                name: '300×300×150 Sump',
+                className: 'sump'
+            });
+            
+            // Add drain
+            const drainLevel = levels[levels.length - 1];
+            componentGroups.push({
+                levels: [drainLevel, drainLevel],
+                name: '100×100 Drain',
+                className: 'drain',
+                height: 20
+            });
+            
+            componentGroups.forEach((group, idx) => {
+                const topLevel = group.levels[0].level;
+                const bottomLevel = group.levels[group.levels.length - 1].level;
+                const topPixel = getPixelHeight(topLevel);
+                const bottomPixel = getPixelHeight(bottomLevel);
+                const height = Math.max(bottomPixel - topPixel, group.height || 30);
+                
+                if (height > 20) {
+                    const box = document.createElement('div');
+                    box.className = `component-box ${group.className}`;
+                    box.style.top = topPixel + 'px';
+                    box.style.height = height + 'px';
+                    box.textContent = group.name;
+                    diagram.appendChild(box);
+                }
+            });
+        }
+        
+        ductLevelInput.addEventListener('input', calculate);
+        ductLevelInput.addEventListener('change', calculate);
+        laserDatumInput.addEventListener('input', calculate);
+        laserDatumInput.addEventListener('change', calculate);
+        
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
