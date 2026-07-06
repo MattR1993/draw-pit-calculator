@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw Pit Dip Sheet Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -112,6 +113,45 @@
             margin-bottom: 15px;
         }
         
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #64398a;
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+        }
+        
         .fixed-params {
             background: white;
             padding: 15px;
@@ -162,141 +202,189 @@
             color: #333;
         }
         
-        .diagram-wrapper {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .diagram {
-            flex: 1;
+        .section-container {
             background: white;
             border: 2px solid #667eea;
             border-radius: 4px;
-            padding: 20px;
+            padding: 30px;
             position: relative;
-            overflow-x: auto;
-            min-height: 600px;
         }
         
-        .diagram-content {
-            position: relative;
-            width: 100%;
+        .section-title-text {
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 20px;
+            color: #333;
         }
         
-        .component-row {
+        .scale-text {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Cross-section styling */
+        .pit-drawing {
             position: relative;
+            height: 600px;
+            border: 1px solid #ddd;
+            background: #fafafa;
             display: flex;
-            align-items: stretch;
-            margin-bottom: 2px;
-            min-height: 30px;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .pit-ground {
+            background: linear-gradient(45deg, #d4a574 25%, transparent 25%, transparent 75%, #d4a574 75%, #d4a574),
+                        linear-gradient(45deg, #d4a574 25%, transparent 25%, transparent 75%, #d4a574 75%, #d4a574);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            background-color: #c9a167;
+            height: 80px;
+            position: relative;
+            border-top: 2px solid #333;
+        }
+        
+        .ground-level {
+            position: absolute;
+            top: -25px;
+            left: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .pit-section {
+            flex: 1;
+            position: relative;
+            background: white;
+            border-left: 2px solid #333;
+            border-right: 2px solid #333;
+            display: flex;
+        }
+        
+        .pit-walls {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(200,200,200,0.2) 25%, transparent 25%, transparent 75%, rgba(200,200,200,0.2) 75%),
+                        linear-gradient(45deg, rgba(200,200,200,0.2) 25%, transparent 25%, transparent 75%, rgba(200,200,200,0.2) 75%);
+            background-size: 15px 15px;
+            border: 1px solid #999;
+            margin: 10px;
+            position: relative;
+        }
+        
+        .pit-content {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            display: flex;
+            flex-direction: column;
         }
         
         .level-marker {
-            min-width: 80px;
-            padding-right: 10px;
+            display: flex;
+            align-items: center;
             font-size: 10px;
             font-weight: 600;
-            color: #667eea;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: right;
-            border-right: 1px dashed #ccc;
+            color: #333;
+            position: absolute;
+            gap: 8px;
+        }
+        
+        .level-line {
+            width: 30px;
+            height: 1px;
+            background: #333;
         }
         
         .level-value {
-            font-size: 9px;
-            color: #999;
+            white-space: nowrap;
         }
         
-        .component-box {
-            flex: 1;
-            padding: 8px 15px;
-            margin-left: 10px;
-            border: 2px solid;
-            border-radius: 3px;
+        .component {
             display: flex;
             align-items: center;
-            font-weight: 600;
-            font-size: 12px;
-            color: white;
-            text-align: center;
             justify-content: center;
-            min-height: 35px;
-        }
-        
-        .component-box.cover {
-            background: linear-gradient(135deg, #FF6B6B, #FF5252);
-            border-color: #CC5555;
-        }
-        
-        .component-box.bedding {
-            background: linear-gradient(135deg, #FFA500, #FF9800);
-            border-color: #CC8400;
-        }
-        
-        .component-box.stackabox {
-            background: linear-gradient(135deg, #4A90E2, #2E5FE2);
-            border-color: #3A70C2;
-        }
-        
-        .component-box.sump {
-            background: linear-gradient(135deg, #764BA2, #6A3FA0);
-            border-color: #564B82;
-        }
-        
-        .component-box.drain {
-            background: linear-gradient(135deg, #0066CC, #0052A3);
-            border-color: #004499;
-        }
-        
-        .laser-datum-row {
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin: 5px 0;
-            padding: 5px 0;
-            border-top: 3px solid #FF6B6B;
-            background: rgba(255, 107, 107, 0.1);
-        }
-        
-        .laser-datum-row .level-marker {
-            color: #FF6B6B;
-            font-weight: 700;
-        }
-        
-        .laser-datum-row .level-value {
-            color: #FF6B6B;
-        }
-        
-        .offset-value {
-            min-width: 70px;
-            font-size: 9px;
-            color: #FF6B6B;
+            font-size: 11px;
             font-weight: 600;
-            text-align: right;
-            padding-right: 10px;
+            text-align: center;
+            border: 2px solid;
+            margin: 5px 0;
+            color: white;
+            padding: 5px;
         }
         
-        .legend {
+        .component.cover {
+            background: #FF6B6B;
+            border-color: #CC5555;
+            height: 30px;
+        }
+        
+        .component.bedding {
+            background: #FFA500;
+            border-color: #CC8400;
+            height: 25px;
+        }
+        
+        .component.stackabox {
+            background: #4A90E2;
+            border-color: #3A70C2;
+            height: 100px;
+            flex-direction: column;
+        }
+        
+        .component.sump {
+            background: #764BA2;
+            border-color: #564B82;
+            height: 80px;
+        }
+        
+        .component.drain {
+            background: #0066CC;
+            border-color: #004499;
+            height: 20px;
+            font-size: 9px;
+        }
+        
+        .component.concrete {
+            background: linear-gradient(135deg, #999 25%, transparent 25%, transparent 75%, #999 75%),
+                        linear-gradient(45deg, #999 25%, transparent 25%, transparent 75%, #999 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+            background-color: #aaa;
+            border: 1px solid #666;
+            height: 60px;
+            color: #333;
+        }
+        
+        .dimension-line {
+            position: absolute;
+            right: -40px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            min-width: 130px;
-        }
-        
-        .legend-item {
-            display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 11px;
+            gap: 2px;
+            font-size: 9px;
+            color: #333;
         }
         
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 2px;
-            border: 1px solid #999;
+        .dimension-arrow {
+            width: 0;
+            height: 0;
+            border-left: 3px solid transparent;
+            border-right: 3px solid transparent;
+        }
+        
+        .dimension-arrow.up {
+            border-bottom: 5px solid #333;
+        }
+        
+        .dimension-arrow.down {
+            border-top: 5px solid #333;
         }
         
         .results-section {
@@ -408,13 +496,44 @@
             display: block;
         }
         
+        .pdf-container {
+            display: none;
+            background: white;
+            padding: 40px;
+        }
+        
+        .pdf-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .pdf-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .pdf-section {
+            margin-bottom: 30px;
+        }
+        
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
             }
-            
-            .diagram-wrapper {
-                flex-direction: column;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            .input-section,
+            .results-section {
+                page-break-inside: avoid;
             }
         }
     </style>
@@ -423,11 +542,21 @@
     <div class="container">
         <div class="header">
             <h1>🏗️ Draw Pit Dip Sheet Calculator</h1>
-            <p>Automatic calculation of Stackabox levels with B125 cover, bedding, and laser datum offsets (in metres)</p>
+            <p>Professional cross-section and DIP sheet for draw pit construction (metres)</p>
         </div>
         
         <div class="content">
             <div class="input-section">
+                <h2>Project Details</h2>
+                
+                <div class="input-group">
+                    <label for="drawPitNumber">Draw Pit Number</label>
+                    <input type="text" id="drawPitNumber" placeholder="e.g., DP-01" value="DP-01">
+                    <div class="input-helper">Enter your draw pit reference number</div>
+                </div>
+                
+                <div class="input-section-divider"></div>
+                
                 <h2>Input Parameters</h2>
                 
                 <div class="section-title">Site Levels</div>
@@ -450,9 +579,12 @@
                     <div class="error" id="laserError"></div>
                 </div>
                 
-                <p style="font-size: 12px; color: #999; margin-top: 15px; font-style: italic;">
-                    💡 <strong>Tip:</strong> All level offsets in the DIP table will be calculated relative to the laser datum you set above.
-                </p>
+                <div class="input-section-divider"></div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="generatePDF()">📥 Export PDF</button>
+                    <button class="btn btn-secondary" onclick="printPage()">🖨️ Print</button>
+                </div>
                 
                 <div class="input-section-divider"></div>
                 
@@ -484,38 +616,13 @@
             </div>
             
             <div class="cross-section">
-                <h2>Cross Section Diagram (m)</h2>
-                <div class="diagram-wrapper">
-                    <div class="diagram" id="diagram">
+                <h2>Professional Cross-Section</h2>
+                <div class="section-container">
+                    <div class="pit-drawing" id="pitDrawing">
                         <!-- Populated by JavaScript -->
                     </div>
-                    <div class="legend">
-                        <div style="font-weight: 600; color: #667eea; font-size: 12px; margin-bottom: 10px;">Legend:</div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, #FF6B6B, #FF5252);"></div>
-                            <span>Cover</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, #FFA500, #FF9800);"></div>
-                            <span>Bedding</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, #4A90E2, #2E5FE2);"></div>
-                            <span>Stackabox</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, #764BA2, #6A3FA0);"></div>
-                            <span>Sump</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, #0066CC, #0052A3);"></div>
-                            <span>Drain</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background: rgba(255, 107, 107, 0.1); border-color: #FF6B6B;"></div>
-                            <span>Laser Datum</span>
-                        </div>
-                    </div>
+                    <div class="section-title-text">DRAW PIT - TYPICAL SECTION</div>
+                    <div class="scale-text">1 : 20 Scale (Approximate)</div>
                 </div>
             </div>
             
@@ -557,6 +664,24 @@
         </div>
     </div>
     
+    <div class="pdf-container" id="pdfContainer">
+        <div class="pdf-header">
+            <div class="pdf-title">DRAW PIT DIP SHEET</div>
+            <div style="font-size: 18px; font-weight: 600; color: #667eea;" id="pdfDrawPitNumber">DP-01</div>
+        </div>
+        
+        <div class="pdf-section" id="pdfCrossSection">
+            <!-- Cross-section diagram will be cloned here -->
+        </div>
+        
+        <div class="pdf-section">
+            <h3 style="margin-bottom: 15px; color: #333; font-size: 16px;">DIP SHEET DATA</h3>
+            <table class="dip-table" id="pdfDipTable">
+                <!-- DIP table will be cloned here -->
+            </table>
+        </div>
+    </div>
+    
     <script>
         const FINISHED_LEVEL = 6.100;
         const COVER_DEPTH = 0.040;
@@ -564,9 +689,10 @@
         const STACKABOX_HEIGHT = 0.150;
         const INVERT_OFFSET = 0.450;
         
+        const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
         const laserDatumInput = document.getElementById('laserDatum');
-        const diagram = document.getElementById('diagram');
+        const pitDrawing = document.getElementById('pitDrawing');
         const dipTableBody = document.getElementById('dipTableBody');
         
         function calculate() {
@@ -616,10 +742,10 @@
             
             // Build levels array
             const levels = [
-                { name: 'Finished Compound Level', level: FINISHED_LEVEL, type: 'cover' },
+                { name: 'Finished Compound Level', level: FINISHED_LEVEL, type: 'finished' },
                 { name: 'Cover Top Level (B125 Cover)', level: coverTopLevel, type: 'cover' },
                 { name: 'Bedding Level', level: beddingLevel, type: 'bedding' },
-                { name: 'Lowest Duct Level', level: ductLevel, type: null }
+                { name: 'Lowest Duct Level', level: ductLevel, type: 'duct' }
             ];
             
             for (let i = 1; i <= numUnits; i++) {
@@ -649,48 +775,104 @@
                 `;
             }).join('');
             
-            // Draw diagram
-            drawDiagram(levels, laserDatum);
+            // Draw cross-section
+            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits);
         }
         
-        function drawDiagram(levels, laserDatum) {
-            const content = document.createElement('div');
-            content.className = 'diagram-content';
+        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits) {
+            pitDrawing.innerHTML = '';
             
-            // Draw each component
-            levels.forEach((lv, idx) => {
-                if (!lv.type) return;
-                
-                const row = document.createElement('div');
-                row.className = 'component-row';
-                
-                const marker = document.createElement('div');
-                marker.className = 'level-marker';
-                marker.innerHTML = `
-                    <div>${lv.level.toFixed(3)}</div>
-                    <div class="level-value">Δ${(laserDatum - lv.level).toFixed(3)}</div>
-                `;
-                
-                const component = document.createElement('div');
-                component.className = `component-box ${lv.type}`;
-                component.textContent = lv.name;
-                
-                row.appendChild(marker);
-                row.appendChild(component);
-                content.appendChild(row);
-            });
+            const totalHeight = FINISHED_LEVEL - invertLevel;
+            const pixelHeight = 500;
+            const pixelsPerMetre = pixelHeight / totalHeight;
             
-            // Draw laser datum line
-            const laserRow = document.createElement('div');
-            laserRow.className = 'laser-datum-row';
-            const laserMarker = document.createElement('div');
-            laserMarker.className = 'level-marker';
-            laserMarker.innerHTML = `<div>LASER: ${laserDatum.toFixed(3)}</div>`;
-            laserRow.appendChild(laserMarker);
-            content.appendChild(laserRow);
+            function getPixelFromBottom(level) {
+                return (level - invertLevel) * pixelsPerMetre;
+            }
             
-            diagram.innerHTML = '';
-            diagram.appendChild(content);
+            // Draw concrete base
+            const concreteHeight = 0.060;
+            const concrete = document.createElement('div');
+            concrete.className = 'component concrete';
+            concrete.style.height = (concreteHeight * pixelsPerMetre) + 'px';
+            concrete.textContent = 'C30 Concrete Base';
+            pitDrawing.appendChild(concrete);
+            
+            // Draw drain
+            const drainHeight = getPixelFromBottom(ductLevel - INVERT_OFFSET) - getPixelFromBottom(invertLevel) - concreteHeight * pixelsPerMetre;
+            const drain = document.createElement('div');
+            drain.className = 'component drain';
+            drain.style.height = Math.max(drainHeight, 15) + 'px';
+            drain.textContent = '100×100 Drain';
+            pitDrawing.appendChild(drain);
+            
+            // Draw sump
+            const sumpHeight = STACKABOX_HEIGHT * pixelsPerMetre;
+            const sump = document.createElement('div');
+            sump.className = 'component sump';
+            sump.style.height = sumpHeight + 'px';
+            sump.textContent = 'Sump 300×300×150';
+            pitDrawing.appendChild(sump);
+            
+            // Draw stackabox units
+            for (let i = 1; i <= numUnits; i++) {
+                const stackbox = document.createElement('div');
+                stackbox.className = 'component stackabox';
+                stackbox.style.height = (STACKABOX_HEIGHT * pixelsPerMetre) + 'px';
+                stackbox.textContent = `Stackabox Unit ${i}`;
+                pitDrawing.appendChild(stackbox);
+            }
+            
+            // Draw bedding
+            const bedding = document.createElement('div');
+            bedding.className = 'component bedding';
+            bedding.style.height = (BEDDING_DEPTH * pixelsPerMetre) + 'px';
+            bedding.textContent = 'Bedding 0.030m';
+            pitDrawing.appendChild(bedding);
+            
+            // Draw cover
+            const cover = document.createElement('div');
+            cover.className = 'component cover';
+            cover.style.height = (COVER_DEPTH * pixelsPerMetre) + 'px';
+            cover.textContent = 'B125 Cover 0.040m';
+            pitDrawing.appendChild(cover);
+            
+            // Draw ground
+            const ground = document.createElement('div');
+            ground.className = 'pit-ground';
+            ground.innerHTML = `<div class="ground-level">FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD</div>`;
+            pitDrawing.appendChild(ground);
+        }
+        
+        function generatePDF() {
+            const element = document.getElementById('pdfContainer');
+            const drawPitNum = drawPitNumberInput.value || 'DP-01';
+            
+            // Update PDF headers
+            document.getElementById('pdfDrawPitNumber').textContent = drawPitNum;
+            
+            // Clone cross-section
+            const crossSectionClone = pitDrawing.cloneNode(true);
+            document.getElementById('pdfCrossSection').innerHTML = '';
+            document.getElementById('pdfCrossSection').appendChild(crossSectionClone);
+            
+            // Clone DIP table
+            const tableClone = dipTableBody.parentElement.parentElement.cloneNode(true);
+            document.getElementById('pdfDipTable').innerHTML = tableClone.querySelector('tbody').innerHTML;
+            
+            const opt = {
+                margin: 10,
+                filename: `DrawPit_${drawPitNum}_DipSheet.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+        
+        function printPage() {
+            window.print();
         }
         
         ductLevelInput.addEventListener('input', calculate);
