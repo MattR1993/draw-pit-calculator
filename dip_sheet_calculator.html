@@ -747,7 +747,9 @@
             // Calculations
             const beddingLevel = FINISHED_LEVEL - BEDDING_DEPTH;
             const requiredDepth = FINISHED_LEVEL - BEDDING_DEPTH - ductLevel;
-            const numUnits = Math.ceil(requiredDepth / STACKABOX_HEIGHT);
+            const unitsAboveDuct = Math.floor(requiredDepth / STACKABOX_HEIGHT);
+            // Ensure at least 1 full stackabox unit sits below the duct
+            const numUnits = Math.max(Math.ceil(requiredDepth / STACKABOX_HEIGHT), unitsAboveDuct + 2);
             const actualDepth = numUnits * STACKABOX_HEIGHT;
             const invertLevel = ductLevel - INVERT_OFFSET;
             
