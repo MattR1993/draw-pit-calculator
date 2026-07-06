@@ -705,9 +705,11 @@
         const INVERT_OFFSET = 0.450;
         
         // Cross-section display scale constants
-        const CROSS_SECTION_SCALE_PX_PER_M = 200;
-        const DRAIN_BODY_DEPTH = 0.100;
-        const CONCRETE_BASE_DEPTH = 0.300;
+        const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
+        const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
+        const CONCRETE_BASE_DEPTH = 0.300; // metres visual concrete thickness
+        const CROSS_SECTION_TOP_PADDING_M = 0.120;
+        const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
         
@@ -826,8 +828,6 @@
         function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel) {
             pitDrawing.innerHTML = '';
 
-            const topPadding = 0.120;
-            const bottomPadding = 0.120;
             const safeCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : FINISHED_LEVEL;
             const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
             const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
@@ -836,12 +836,13 @@
 
             const highestLevel = Math.max(FINISHED_LEVEL, laserDatum, safeCurrentGroundLevel);
             const lowestLevel = Math.min(concreteBottomLevel, sumpBottomLevel, invertLevel);
-            const drawingTopLevel = highestLevel + topPadding;
-            const drawingBottomLevel = lowestLevel - bottomPadding;
+            const drawingTopLevel = highestLevel + CROSS_SECTION_TOP_PADDING_M;
+            const drawingBottomLevel = lowestLevel - CROSS_SECTION_BOTTOM_PADDING_M;
             const totalHeightPx = Math.max(MIN_CROSS_SECTION_HEIGHT_PX, (drawingTopLevel - drawingBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
 
             pitDrawing.style.height = `${totalHeightPx}px`;
 
+            // Convert an elevation value (m AOD) into vertical pixels from the top of the drawing area.
             const levelToTopPx = (level) => (drawingTopLevel - level) * CROSS_SECTION_SCALE_PX_PER_M;
 
             const createLevelMarkerHtml = (level, color = '#667eea', extraHtml = '') => {
