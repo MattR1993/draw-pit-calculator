@@ -829,7 +829,47 @@
             `;
             pitDrawing.appendChild(beddingMarkerRow);
             
-            // Add duct level marker
+            // Calculate how many complete stackabox units sit entirely above the duct centre
+            const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / STACKABOX_HEIGHT);
+            // Index (0-based from beddingLevel) of the unit that the duct passes through
+            const ductUnitIndex = unitsAboveDuct;
+            
+            // Draw stackabox units ABOVE the duct
+            for (let i = 0; i < unitsAboveDuct; i++) {
+                const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
+                const stackRow = document.createElement('div');
+                stackRow.className = 'component-row';
+                stackRow.innerHTML = `
+                    <div class="component stackabox">Stackabox Unit ${i + 1}</div>
+                    <div class="level-marker">
+                        <div class="level-line"></div>
+                        <div>${unitTopLevel.toFixed(3)}</div>
+                        <div class="delta-value">Δ ${(laserDatum - unitTopLevel).toFixed(3)}</div>
+                    </div>
+                `;
+                pitDrawing.appendChild(stackRow);
+            }
+            
+            // Draw the unit that the duct passes through (with duct core and duct level marker)
+            const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
+            const ductUnitRow = document.createElement('div');
+            ductUnitRow.className = 'component-row';
+            ductUnitRow.innerHTML = `
+                <div class="component stackabox-with-duct">
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        Stackabox Unit ${ductUnitIndex + 1}
+                        <div class="duct-core">Duct Ø</div>
+                    </div>
+                </div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${ductUnitTopLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - ductUnitTopLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(ductUnitRow);
+            
+            // Add duct centre level marker (dashed line) after the duct unit top
             const ductRow = document.createElement('div');
             ductRow.className = 'component-row';
             ductRow.innerHTML = `
@@ -842,26 +882,17 @@
             `;
             pitDrawing.appendChild(ductRow);
             
-            // Add stackabox units with duct cores
-            for (let i = 1; i <= numUnits; i++) {
-                const stackLevel = ductLevel - (i - 1) * STACKABOX_HEIGHT;
+            // Draw any stackabox units BELOW the duct
+            for (let i = ductUnitIndex + 1; i < numUnits; i++) {
+                const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
                 const stackRow = document.createElement('div');
                 stackRow.className = 'component-row';
-                
-                // Only show duct core on first unit containing the duct level
-                const isFirstUnit = (i === 1);
-                
                 stackRow.innerHTML = `
-                    <div class="component stackabox-with-duct">
-                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-                            Stackabox Unit ${i}
-                            ${isFirstUnit ? '<div class="duct-core">Duct Ø</div>' : ''}
-                        </div>
-                    </div>
+                    <div class="component stackabox">Stackabox Unit ${i + 1}</div>
                     <div class="level-marker">
                         <div class="level-line"></div>
-                        <div>${stackLevel.toFixed(3)}</div>
-                        <div class="delta-value">Δ ${(laserDatum - stackLevel).toFixed(3)}</div>
+                        <div>${unitTopLevel.toFixed(3)}</div>
+                        <div class="delta-value">Δ ${(laserDatum - unitTopLevel).toFixed(3)}</div>
                     </div>
                 `;
                 pitDrawing.appendChild(stackRow);
