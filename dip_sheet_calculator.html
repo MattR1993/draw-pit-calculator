@@ -708,6 +708,8 @@
         const CROSS_SECTION_SCALE_PX_PER_M = 200;
         const DRAIN_BODY_DEPTH = 0.100;
         const CONCRETE_BASE_DEPTH = 0.300;
+        const MIN_CROSS_SECTION_HEIGHT_PX = 600;
+        const MIN_COMPONENT_HEIGHT_PX = 1;
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -826,16 +828,17 @@
 
             const topPadding = 0.120;
             const bottomPadding = 0.120;
+            const safeCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : FINISHED_LEVEL;
             const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
             const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
             const concreteTopLevel = drainBottomLevel;
             const concreteBottomLevel = concreteTopLevel - CONCRETE_BASE_DEPTH;
 
-            const highestLevel = Math.max(FINISHED_LEVEL, laserDatum, currentGroundLevel);
+            const highestLevel = Math.max(FINISHED_LEVEL, laserDatum, safeCurrentGroundLevel);
             const lowestLevel = Math.min(concreteBottomLevel, sumpBottomLevel, invertLevel);
             const drawingTopLevel = highestLevel + topPadding;
             const drawingBottomLevel = lowestLevel - bottomPadding;
-            const totalHeightPx = Math.max(600, (drawingTopLevel - drawingBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
+            const totalHeightPx = Math.max(MIN_CROSS_SECTION_HEIGHT_PX, (drawingTopLevel - drawingBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
 
             pitDrawing.style.height = `${totalHeightPx}px`;
 
@@ -853,7 +856,7 @@
             };
 
             const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerHtml = '') => {
-                const heightPx = Math.max(1, (topLevel - bottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
+                const heightPx = Math.max(MIN_COMPONENT_HEIGHT_PX, (topLevel - bottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
                 const row = document.createElement('div');
                 row.className = 'component-row';
                 row.style.top = `${levelToTopPx(topLevel)}px`;
@@ -871,12 +874,15 @@
                 lineRow.style.top = `${levelToTopPx(level)}px`;
                 lineRow.style.borderTopColor = color;
                 lineRow.style.borderTopStyle = dashed ? 'dashed' : 'solid';
+                const markerDeltaHtml = showDelta
+                    ? `<div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>`
+                    : '<div style="font-size: 10px; font-weight: 700;">LASER</div>';
                 lineRow.innerHTML = `
                     <div class="level-line-label" style="color: ${color};">${label}: ${level.toFixed(3)} m AOD</div>
                     <div class="level-marker" style="color: ${color};">
                         <div class="level-line" style="background: ${color};"></div>
                         <div>${level.toFixed(3)}</div>
-                        ${showDelta ? `<div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>` : '<div style="font-size: 10px; font-weight: 700;">LASER</div>'}
+                        ${markerDeltaHtml}
                     </div>
                 `;
                 pitDrawing.appendChild(lineRow);
@@ -950,7 +956,7 @@
             addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', createLevelMarkerHtml(invertLevel));
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
-            addLevelLine('CURRENT GROUND', currentGroundLevel, '#228B22', true);
+            addLevelLine('CURRENT GROUND', safeCurrentGroundLevel, '#228B22', true);
             addLevelLine('FINISHED', FINISHED_LEVEL, '#333');
             addLevelLine('BEDDING LEVEL', beddingLevel, '#999', true);
             addLevelLine('SUMP BOTTOM', sumpBottomLevel, '#764BA2', true);
