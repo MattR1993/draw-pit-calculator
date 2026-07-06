@@ -236,24 +236,30 @@
             padding: 20px 100px 20px 20px;
         }
         
-        .pit-ground {
-            background: linear-gradient(45deg, #d4a574 25%, transparent 25%, transparent 75%, #d4a574 75%, #d4a574),
-                        linear-gradient(45deg, #d4a574 25%, transparent 25%, transparent 75%, #d4a574 75%, #d4a574);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
-            background-color: #c9a167;
-            height: 60px;
+        .current-ground-row {
             position: relative;
-            border-top: 2px solid #333;
+            border-top: 2px dashed #228B22;
+            background: rgba(34, 139, 34, 0.05);
+            min-height: 30px;
         }
-        
-        .ground-level {
+
+        .current-ground-label {
             position: absolute;
-            top: -25px;
-            left: 20px;
+            top: 3px;
+            left: 5px;
             font-size: 11px;
             font-weight: 700;
+            color: #228B22;
             white-space: nowrap;
+        }
+
+        .finished-level-row {
+            position: relative;
+            border-top: 3px solid #333;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 3px 0 3px 5px;
+            font-size: 11px;
+            font-weight: 700;
         }
         
         .component-row {
@@ -479,6 +485,13 @@
         .dip-table td {
             padding: 12px;
             border-bottom: 1px solid #e0e0e0;
+            color: #000;
+            display: table-cell;
+            background: transparent;
+            flex: unset;
+            border-left: none;
+            border-right: none;
+            border-top: none;
         }
         
         .dip-table tr:hover {
@@ -491,12 +504,12 @@
         
         .dip-table .level {
             font-weight: 600;
-            color: #667eea;
+            color: #000;
         }
         
         .dip-table .offset {
             font-weight: 600;
-            color: #FF6B6B;
+            color: #000;
         }
         
         .error {
@@ -598,6 +611,17 @@
                 
                 <div class="input-section-divider"></div>
                 
+                <div class="section-title">Current Site Levels</div>
+                
+                <div class="input-group">
+                    <label for="currentGroundLevel">Current Ground Level (m AOD)</label>
+                    <input type="number" id="currentGroundLevel" placeholder="e.g., 6.400" value="6.400" step="0.001">
+                    <div class="input-helper">Existing ground level before excavation — used to calculate dig depth</div>
+                    <div class="error" id="currentGroundLevelError"></div>
+                </div>
+                
+                <div class="input-section-divider"></div>
+                
                 <div class="button-group">
                     <button class="btn btn-primary" onclick="generatePDF()">📥 Export PDF</button>
                     <button class="btn btn-secondary" onclick="printPage()">🖨️ Print</button>
@@ -662,6 +686,11 @@
                         <div class="result-value" id="actualDepth">-</div>
                         <div class="result-unit">m</div>
                     </div>
+                    <div class="result-card" id="digDepthCard">
+                        <div class="result-label">Dig Depth</div>
+                        <div class="result-value" id="digDepth">-</div>
+                        <div class="result-unit" id="digDepthUnit">m</div>
+                    </div>
                 </div>
                 
                 <table class="dip-table">
@@ -707,9 +736,15 @@
         const SUMP_DEPTH = 0.150;
         const INVERT_OFFSET = 0.450;
         
+        // Cross-section display scale constants
+        const DIG_DEPTH_SCALE_PX_PER_M = 200;  // pixels per metre for dig depth indicator
+        const MIN_GROUND_HEIGHT_PX = 50;        // minimum height in px when dig depth > 0
+        const DEFAULT_GROUND_HEIGHT_PX = 20;    // height in px when current ground <= finished level
+        
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
         const laserDatumInput = document.getElementById('laserDatum');
+        const currentGroundLevelInput = document.getElementById('currentGroundLevel');
         const pitDrawing = document.getElementById('pitDrawing');
         const dipTableBody = document.getElementById('dipTableBody');
         
@@ -745,6 +780,16 @@
             }
             laserError.classList.remove('show');
             
+            // Current Ground Level validation
+            const currentGroundLevel = parseFloat(currentGroundLevelInput.value);
+            const currentGroundLevelError = document.getElementById('currentGroundLevelError');
+            if (isNaN(currentGroundLevel)) {
+                currentGroundLevelError.textContent = 'Please enter a valid current ground level';
+                currentGroundLevelError.classList.add('show');
+                return;
+            }
+            currentGroundLevelError.classList.remove('show');
+            
             // Calculations
             // beddingLevel = top of first stackabox = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH
             const coverLevel = FINISHED_LEVEL - COVER_DEPTH;
@@ -757,11 +802,16 @@
             const invertLevel = ductLevel - INVERT_OFFSET;
             const sumpTopLevel = beddingLevel - actualDepth;
             const sumpBottomLevel = sumpTopLevel - SUMP_DEPTH;
+            const digDepth = currentGroundLevel - FINISHED_LEVEL;
             
             // Update result cards
             document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
             document.getElementById('numUnits').textContent = numUnits;
             document.getElementById('actualDepth').textContent = actualDepth.toFixed(3);
+            const digDepthCard = document.getElementById('digDepthCard');
+            document.getElementById('digDepth').textContent = Math.abs(digDepth).toFixed(3);
+            document.getElementById('digDepthUnit').textContent = digDepth >= 0 ? 'm to excavate' : 'm fill required';
+            digDepthCard.className = digDepth >= 0 ? 'result-card' : 'result-card warning';
             
             // Build levels array
             const levels = [
@@ -800,17 +850,41 @@
             }).join('');
             
             // Draw cross-section
-            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel);
+            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel);
         }
         
-        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel) {
+        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel) {
             pitDrawing.innerHTML = '';
             
-            // Ground level
-            const ground = document.createElement('div');
-            ground.className = 'pit-ground';
-            ground.innerHTML = `<div class="ground-level">FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD</div>`;
-            pitDrawing.appendChild(ground);
+            // Current ground level indicator (green dashed line)
+            if (!isNaN(currentGroundLevel)) {
+                const digDepth = currentGroundLevel - FINISHED_LEVEL;
+                const extraHeightPx = digDepth > 0 ? Math.max(MIN_GROUND_HEIGHT_PX, digDepth * DIG_DEPTH_SCALE_PX_PER_M) : DEFAULT_GROUND_HEIGHT_PX;
+                const groundRow = document.createElement('div');
+                groundRow.className = 'current-ground-row';
+                groundRow.style.height = extraHeightPx + 'px';
+                groundRow.innerHTML = `
+                    <div class="current-ground-label">CURRENT GROUND: ${currentGroundLevel.toFixed(3)} m AOD</div>
+                    <div class="level-marker" style="color: #228B22;">
+                        <div class="level-line" style="background: #228B22;"></div>
+                        <div>${currentGroundLevel.toFixed(3)}</div>
+                    </div>
+                `;
+                pitDrawing.appendChild(groundRow);
+            }
+            
+            // Finished level marker (replaces brown hatching pit-ground)
+            const finishedRow = document.createElement('div');
+            finishedRow.className = 'finished-level-row';
+            finishedRow.innerHTML = `
+                FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD
+                <div class="level-marker">
+                    <div class="level-line" style="background: #333;"></div>
+                    <div style="color: #333;">${FINISHED_LEVEL.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - FINISHED_LEVEL).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(finishedRow);
             
             // Add cover (B125 lid) – from FL down to coverLevel
             const coverRow = document.createElement('div');
@@ -821,11 +895,6 @@
                         <div>B125 Cover</div>
                         <div style="font-size: 10px;">(0.040m)</div>
                     </div>
-                </div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${FINISHED_LEVEL.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - FINISHED_LEVEL).toFixed(3)}</div>
                 </div>
             `;
             pitDrawing.appendChild(coverRow);
@@ -1016,6 +1085,8 @@
         ductLevelInput.addEventListener('change', calculate);
         laserDatumInput.addEventListener('input', calculate);
         laserDatumInput.addEventListener('change', calculate);
+        currentGroundLevelInput.addEventListener('input', calculate);
+        currentGroundLevelInput.addEventListener('change', calculate);
         
         // Initial calculation
         calculate();
