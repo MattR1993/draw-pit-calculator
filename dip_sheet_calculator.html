@@ -162,11 +162,10 @@
             color: #333;
         }
         
-        .diagram-container {
-            flex-grow: 1;
+        .diagram-wrapper {
             display: flex;
             gap: 20px;
-            align-items: flex-end;
+            align-items: flex-start;
         }
         
         .diagram {
@@ -174,146 +173,156 @@
             background: white;
             border: 2px solid #667eea;
             border-radius: 4px;
+            padding: 20px;
+            min-height: 700px;
             position: relative;
-            min-height: 600px;
-            overflow-y: auto;
+            overflow: hidden;
         }
         
-        .level-marker {
+        .diagram-scale {
             position: absolute;
-            width: 100%;
-            border-top: 1px dashed #ccc;
-            padding: 5px 0;
-            font-size: 10px;
+            left: 20px;
+            bottom: 20px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .level-marker.active {
-            border-top: 2px solid #667eea;
-            background: #f0f4ff;
-            font-weight: 600;
-        }
-        
-        .level-label {
-            background: white;
-            padding: 0 8px;
+            flex-direction: column;
+            gap: 5px;
             font-size: 10px;
-            white-space: nowrap;
-            color: #333;
+            color: #999;
         }
         
-        .level-label.active {
-            color: #667eea;
-            font-weight: bold;
+        .scale-line {
+            width: 50px;
+            height: 1px;
+            background: #ccc;
+            position: relative;
         }
         
-        .level-offset {
-            background: white;
-            padding: 2px 6px;
+        .scale-label {
             font-size: 9px;
-            white-space: nowrap;
-            color: #FF6B6B;
-            font-weight: 600;
-            border-radius: 2px;
-            border: 1px solid #FF6B6B;
+            color: #999;
         }
         
-        .component-box {
+        .component {
             position: absolute;
-            width: 90%;
-            left: 5%;
-            border: 2px solid #667eea;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+            left: 60px;
+            right: 60px;
+            padding: 8px;
+            border: 2px solid;
+            border-radius: 3px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: #667eea;
             text-align: center;
-            padding: 10px;
-            border-radius: 4px;
+            color: white;
             transition: all 0.3s;
         }
         
-        .component-box:hover {
-            background: linear-gradient(135deg, #e8eeff 0%, #dce4ff 100%);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        .component:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         
-        .component-box.cover {
-            background: linear-gradient(135deg, #FFE5E5 0%, #FFD9D9 100%);
-            border-color: #FF6B6B;
+        .component.cover {
+            background: #FF6B6B;
+            border-color: #CC5555;
+        }
+        
+        .component.bedding {
+            background: #FFA500;
+            border-color: #CC8400;
+        }
+        
+        .component.stackabox {
+            background: #4A90E2;
+            border-color: #3A70C2;
+        }
+        
+        .component.sump {
+            background: #764BA2;
+            border-color: #564B82;
+        }
+        
+        .component.drain {
+            background: #0066CC;
+            border-color: #004499;
+        }
+        
+        .level-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+            border-top: 1px dashed #999;
+        }
+        
+        .level-label {
+            position: absolute;
+            left: 5px;
+            font-size: 9px;
+            background: white;
+            padding: 0 4px;
+            color: #667eea;
+            font-weight: 600;
+            transform: translateY(-50%);
+        }
+        
+        .level-offset {
+            position: absolute;
+            right: 5px;
+            font-size: 9px;
+            background: white;
+            padding: 0 4px;
             color: #FF6B6B;
+            font-weight: 600;
+            transform: translateY(-50%);
+            border: 1px solid #FF6B6B;
+            border-radius: 2px;
         }
         
-        .component-box.cover:hover {
-            background: linear-gradient(135deg, #FFD9D9 0%, #FFC9C9 100%);
+        .laser-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 107, 107, 0.3);
+            border-top: 2px solid #FF6B6B;
         }
         
-        .component-box.bedding {
-            background: linear-gradient(135deg, #FFE5CC 0%, #FFD9B3 100%);
-            border-color: #FFA500;
-            color: #FFA500;
-        }
-        
-        .component-box.bedding:hover {
-            background: linear-gradient(135deg, #FFD9B3 0%, #FFC99A 100%);
-        }
-        
-        .component-box.stackabox {
-            background: linear-gradient(135deg, #E5F3FF 0%, #D9EAFF 100%);
-            border-color: #4A90E2;
-            color: #4A90E2;
-        }
-        
-        .component-box.stackabox:hover {
-            background: linear-gradient(135deg, #D9EAFF 0%, #C9E0FF 100%);
-        }
-        
-        .component-box.sump {
-            background: linear-gradient(135deg, #E5E5FF 0%, #D9D9FF 100%);
-            border-color: #764BA2;
-            color: #764BA2;
-        }
-        
-        .component-box.sump:hover {
-            background: linear-gradient(135deg, #D9D9FF 0%, #C9C9FF 100%);
-        }
-        
-        .component-box.drain {
-            background: linear-gradient(135deg, #CCE5FF 0%, #B3D9FF 100%);
-            border-color: #0066CC;
-            color: #0066CC;
-        }
-        
-        .component-box.drain:hover {
-            background: linear-gradient(135deg, #B3D9FF 0%, #99CCFF 100%);
+        .laser-label {
+            position: absolute;
+            right: 5px;
+            background: #FF6B6B;
+            color: white;
+            padding: 2px 6px;
+            font-size: 8px;
+            font-weight: 700;
+            border-radius: 2px;
+            transform: translateY(-50%);
         }
         
         .legend {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             flex-wrap: wrap;
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid #ddd;
+            font-size: 11px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
+            gap: 5px;
         }
         
         .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-            border: 2px solid;
+            width: 15px;
+            height: 15px;
+            border-radius: 2px;
+            border: 1px solid #999;
         }
         
         .results-section {
@@ -377,6 +386,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            font-size: 12px;
         }
         
         .dip-table th {
@@ -385,13 +395,13 @@
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .dip-table td {
             padding: 12px;
             border-bottom: 1px solid #e0e0e0;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .dip-table tr:hover {
@@ -405,10 +415,6 @@
         .dip-table .level {
             font-weight: 600;
             color: #667eea;
-        }
-        
-        .dip-table .component {
-            color: #555;
         }
         
         .dip-table .offset {
@@ -430,33 +436,12 @@
             display: block;
         }
         
-        .laser-datum-highlight {
-            position: absolute;
-            width: 100%;
-            border-top: 3px solid #FF6B6B;
-            background: rgba(255, 107, 107, 0.1);
-            padding: 3px 0;
-            z-index: 1;
-        }
-        
-        .laser-datum-label {
-            position: absolute;
-            right: 5px;
-            background: #FF6B6B;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: 700;
-            z-index: 2;
-        }
-        
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
             }
             
-            .diagram-container {
+            .diagram-wrapper {
                 flex-direction: column;
             }
         }
@@ -476,8 +461,8 @@
                 <div class="section-title">Site Levels</div>
                 
                 <div class="input-group">
-                    <label for="ductLevel">Lowest Duct Level (mm AOD) *</label>
-                    <input type="number" id="ductLevel" placeholder="e.g., 5500" value="5500">
+                    <label for="ductLevel">Lowest Duct Level (m AOD) *</label>
+                    <input type="number" id="ductLevel" placeholder="e.g., 5.500" value="5.500" step="0.001">
                     <div class="input-helper">Enter the elevation of the lowest duct center</div>
                     <div class="error" id="ductError"></div>
                 </div>
@@ -487,8 +472,8 @@
                 <div class="section-title">Laser Datum (Rotating Laser Height)</div>
                 
                 <div class="input-group">
-                    <label for="laserDatum">Laser Datum Level (mm AOD)</label>
-                    <input type="number" id="laserDatum" placeholder="e.g., 6500" value="6500">
+                    <label for="laserDatum">Laser Datum Level (m AOD)</label>
+                    <input type="number" id="laserDatum" placeholder="e.g., 6.500" value="6.500" step="0.001">
                     <div class="input-helper">Height of rotating laser - for relative offset calculations</div>
                     <div class="error" id="laserError"></div>
                 </div>
@@ -505,55 +490,57 @@
                     <h3>Reference Levels</h3>
                     <div class="fixed-param">
                         <span class="fixed-param-label">Finished Compound Level</span>
-                        <span class="fixed-param-value">6100 mm AOD</span>
+                        <span class="fixed-param-value">6.100 m AOD</span>
                     </div>
                     <div class="fixed-param">
                         <span class="fixed-param-label">Cover Depth</span>
-                        <span class="fixed-param-value">40 mm</span>
+                        <span class="fixed-param-value">0.040 m</span>
                     </div>
                     <div class="fixed-param">
                         <span class="fixed-param-label">Bedding Depth</span>
-                        <span class="fixed-param-value">30 mm</span>
+                        <span class="fixed-param-value">0.030 m</span>
                     </div>
                     <div class="fixed-param">
                         <span class="fixed-param-label">Stackabox Unit Height</span>
-                        <span class="fixed-param-value">150 mm</span>
+                        <span class="fixed-param-value">0.150 m</span>
                     </div>
                     <div class="fixed-param">
                         <span class="fixed-param-label">Invert Below Duct</span>
-                        <span class="fixed-param-value">450 mm</span>
+                        <span class="fixed-param-value">0.450 m</span>
                     </div>
                 </div>
             </div>
             
             <div class="cross-section">
                 <h2>Cross Section Diagram</h2>
-                <div class="diagram-container">
-                    <div class="diagram" id="diagram"></div>
-                    <div style="min-width: 120px;">
+                <div class="diagram-wrapper">
+                    <div class="diagram" id="diagram">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                    <div>
                         <div class="legend">
                             <div class="legend-item">
-                                <div class="legend-color" style="background: linear-gradient(135deg, #FFE5E5 0%, #FFD9D9 100%); border-color: #FF6B6B;"></div>
+                                <div class="legend-color" style="background: #FF6B6B;"></div>
                                 <span>Cover</span>
                             </div>
                             <div class="legend-item">
-                                <div class="legend-color" style="background: linear-gradient(135deg, #FFE5CC 0%, #FFD9B3 100%); border-color: #FFA500;"></div>
+                                <div class="legend-color" style="background: #FFA500;"></div>
                                 <span>Bedding</span>
                             </div>
                             <div class="legend-item">
-                                <div class="legend-color" style="background: linear-gradient(135deg, #E5F3FF 0%, #D9EAFF 100%); border-color: #4A90E2;"></div>
+                                <div class="legend-color" style="background: #4A90E2;"></div>
                                 <span>Stackabox</span>
                             </div>
                             <div class="legend-item">
-                                <div class="legend-color" style="background: linear-gradient(135deg, #E5E5FF 0%, #D9D9FF 100%); border-color: #764BA2;"></div>
-                                <span>Sump 300x300</span>
+                                <div class="legend-color" style="background: #764BA2;"></div>
+                                <span>Sump</span>
                             </div>
                             <div class="legend-item">
-                                <div class="legend-color" style="background: linear-gradient(135deg, #CCE5FF 0%, #B3D9FF 100%); border-color: #0066CC;"></div>
-                                <span>Drain 100x100</span>
+                                <div class="legend-color" style="background: #0066CC;"></div>
+                                <span>Drain</span>
                             </div>
                             <div class="legend-item">
-                                <div class="legend-color" style="background: rgba(255, 107, 107, 0.2); border-color: #FF6B6B;"></div>
+                                <div class="legend-color" style="background: rgba(255, 107, 107, 0.3); border-color: #FF6B6B;"></div>
                                 <span>Laser Datum</span>
                             </div>
                         </div>
@@ -568,17 +555,17 @@
                     <div class="result-card">
                         <div class="result-label">Required Depth</div>
                         <div class="result-value" id="requiredDepth">-</div>
-                        <div class="result-unit">mm</div>
+                        <div class="result-unit">m</div>
                     </div>
                     <div class="result-card warning">
                         <div class="result-label">Stackabox Units (Whole)</div>
                         <div class="result-value" id="numUnits">-</div>
-                        <div class="result-unit">units @ 150mm each</div>
+                        <div class="result-unit">units @ 0.150m each</div>
                     </div>
                     <div class="result-card">
                         <div class="result-label">Actual Depth Built</div>
                         <div class="result-value" id="actualDepth">-</div>
-                        <div class="result-unit">mm</div>
+                        <div class="result-unit">m</div>
                     </div>
                 </div>
                 
@@ -586,7 +573,7 @@
                     <thead>
                         <tr>
                             <th>Level Description</th>
-                            <th>Elevation (mm AOD)</th>
+                            <th>Elevation (m AOD)</th>
                             <th>Depth Below Finished</th>
                             <th>Offset from Laser Datum</th>
                         </tr>
@@ -600,11 +587,12 @@
     </div>
     
     <script>
-        const FINISHED_LEVEL = 6100;
-        const COVER_DEPTH = 40;
-        const BEDDING_DEPTH = 30;
-        const STACKABOX_HEIGHT = 150;
-        const INVERT_OFFSET = 450;
+        const FINISHED_LEVEL = 6.100;
+        const COVER_DEPTH = 0.040;
+        const BEDDING_DEPTH = 0.030;
+        const STACKABOX_HEIGHT = 0.150;
+        const INVERT_OFFSET = 0.450;
+        const PIXELS_PER_METRE = 200; // pixels per metre for diagram
         
         const ductLevelInput = document.getElementById('ductLevel');
         const laserDatumInput = document.getElementById('laserDatum');
@@ -625,7 +613,7 @@
                 return;
             }
             if (ductLevel >= FINISHED_LEVEL) {
-                ductError.textContent = 'Duct level must be below finished level (6100 mm AOD)';
+                ductError.textContent = 'Duct level must be below finished level (6.100 m AOD)';
                 ductError.classList.add('show');
                 return;
             }
@@ -649,163 +637,145 @@
             const requiredDepth = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH - ductLevel;
             const numUnits = Math.ceil(requiredDepth / STACKABOX_HEIGHT);
             const actualDepth = numUnits * STACKABOX_HEIGHT;
-            const stackBoxTop = ductLevel;
             const stackBoxBottom = ductLevel - actualDepth;
-            const sumpTop = ductLevel - actualDepth;
             const sumpBottom = ductLevel - actualDepth - STACKABOX_HEIGHT;
             const invertLevel = ductLevel - INVERT_OFFSET;
             
             // Update result cards
-            document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(0);
+            document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
             document.getElementById('numUnits').textContent = numUnits;
-            document.getElementById('actualDepth').textContent = actualDepth.toFixed(0);
+            document.getElementById('actualDepth').textContent = actualDepth.toFixed(3);
             
-            // Build DIP table
+            // Build levels array
             const levels = [
-                { name: 'Finished Compound Level', level: FINISHED_LEVEL, depth: 0 },
-                { name: 'Cover Top Level (B125 Cover)', level: coverTopLevel, depth: COVER_DEPTH },
-                { name: 'Bedding Level', level: beddingLevel, depth: COVER_DEPTH + BEDDING_DEPTH },
-                { name: 'Lowest Duct Level', level: ductLevel, depth: FINISHED_LEVEL - ductLevel }
+                { name: 'Finished Compound Level', level: FINISHED_LEVEL, component: 'cover' },
+                { name: 'Cover Top Level (B125 Cover)', level: coverTopLevel, component: 'cover' },
+                { name: 'Bedding Level', level: beddingLevel, component: 'bedding' },
+                { name: 'Lowest Duct Level', level: ductLevel, component: null }
             ];
             
             for (let i = 1; i <= numUnits; i++) {
                 const stackBoxLevelTop = ductLevel - (i - 1) * STACKABOX_HEIGHT;
-                const stackBoxLevelBottom = ductLevel - i * STACKABOX_HEIGHT;
                 levels.push({
                     name: `Stackabox Unit ${i}`,
                     level: stackBoxLevelTop,
-                    depth: FINISHED_LEVEL - stackBoxLevelTop,
-                    isRange: true,
-                    levelBottom: stackBoxLevelBottom
+                    component: 'stackabox'
                 });
             }
             
             levels.push(
-                { name: '300×300×150 Sump Unit', level: sumpTop, depth: FINISHED_LEVEL - sumpTop, isRange: true, levelBottom: sumpBottom },
-                { name: '100×100 Drain (Invert Level)', level: invertLevel, depth: FINISHED_LEVEL - invertLevel }
+                { name: '300×300×150 Sump Unit', level: ductLevel - actualDepth, component: 'sump' },
+                { name: '100×100 Drain (Invert Level)', level: invertLevel, component: 'drain' }
             );
             
+            // Build DIP table
             dipTableBody.innerHTML = levels.map(lv => {
                 const offsetFromLaser = laserDatum - lv.level;
-                const offsetClass = offsetFromLaser >= 0 ? '' : 'style="color: #FF6B6B;"';
                 return `
                     <tr>
                         <td class="component">${lv.name}</td>
-                        <td class="level">${lv.level.toFixed(0)}</td>
-                        <td>${(FINISHED_LEVEL - lv.level).toFixed(0)} mm</td>
-                        <td class="offset" ${offsetClass}>${offsetFromLaser >= 0 ? '-' : '+'} ${Math.abs(offsetFromLaser).toFixed(0)} mm</td>
+                        <td class="level">${lv.level.toFixed(3)}</td>
+                        <td>${(FINISHED_LEVEL - lv.level).toFixed(3)} m</td>
+                        <td class="offset">${offsetFromLaser >= 0 ? '-' : '+'} ${Math.abs(offsetFromLaser).toFixed(3)} m</td>
                     </tr>
                 `;
             }).join('');
             
             // Draw diagram
-            drawDiagram(levels, FINISHED_LEVEL, laserDatum);
+            drawDiagram(levels, FINISHED_LEVEL, laserDatum, invertLevel);
         }
         
-        function drawDiagram(levels, finishedLevel, laserDatum) {
+        function drawDiagram(levels, finishedLevel, laserDatum, invertLevel) {
             diagram.innerHTML = '';
             
-            const diagramHeight = 600;
-            const minLevel = levels[levels.length - 1].level;
-            const maxLevel = laserDatum + 200; // Add space above laser
-            const levelRange = maxLevel - minLevel;
+            const topLevel = laserDatum + 0.5;
+            const bottomLevel = invertLevel;
+            const totalHeight = topLevel - bottomLevel;
+            const diagramHeight = totalHeight * PIXELS_PER_METRE;
             
-            function getPixelHeight(level) {
-                return ((maxLevel - level) / levelRange) * diagramHeight;
+            diagram.style.minHeight = (diagramHeight + 80) + 'px';
+            
+            function getPixelPosition(level) {
+                return (topLevel - level) * PIXELS_PER_METRE;
             }
             
-            // Draw laser datum marker
-            if (laserDatum > minLevel && laserDatum < maxLevel) {
-                const laserPixelHeight = getPixelHeight(laserDatum);
-                const laserMarker = document.createElement('div');
-                laserMarker.className = 'laser-datum-highlight';
-                laserMarker.style.top = laserPixelHeight + 'px';
-                laserMarker.style.height = '3px';
+            // Draw level lines and labels
+            levels.forEach(lv => {
+                const topPixel = getPixelPosition(lv.level);
+                const lineEl = document.createElement('div');
+                lineEl.className = 'level-line';
+                lineEl.style.top = topPixel + 'px';
                 
-                const laserLabel = document.createElement('div');
-                laserLabel.className = 'laser-datum-label';
-                laserLabel.style.top = (laserPixelHeight - 12) + 'px';
-                laserLabel.textContent = 'LASER DATUM';
+                const labelEl = document.createElement('div');
+                labelEl.className = 'level-label';
+                labelEl.style.top = topPixel + 'px';
+                labelEl.textContent = lv.level.toFixed(3);
                 
-                diagram.appendChild(laserMarker);
-                diagram.appendChild(laserLabel);
-            }
-            
-            // Draw level markers
-            levels.forEach((lv, index) => {
-                const pixelHeight = getPixelHeight(lv.level);
+                const offsetEl = document.createElement('div');
+                offsetEl.className = 'level-offset';
+                offsetEl.style.top = topPixel + 'px';
+                const offsetValue = laserDatum - lv.level;
+                offsetEl.textContent = (offsetValue >= 0 ? '-' : '+') + Math.abs(offsetValue).toFixed(3);
                 
-                const marker = document.createElement('div');
-                marker.className = 'level-marker' + (index <= 3 ? ' active' : '');
-                marker.style.top = pixelHeight + 'px';
-                
-                const label = document.createElement('div');
-                label.className = 'level-label' + (index <= 3 ? ' active' : '');
-                label.textContent = lv.level.toFixed(0);
-                
-                const offsetFromLaser = laserDatum - lv.level;
-                const offsetLabel = document.createElement('div');
-                offsetLabel.className = 'level-offset';
-                offsetLabel.textContent = (offsetFromLaser >= 0 ? '-' : '+') + Math.abs(offsetFromLaser).toFixed(0);
-                
-                marker.appendChild(label);
-                marker.appendChild(offsetLabel);
-                
-                diagram.appendChild(marker);
+                diagram.appendChild(lineEl);
+                diagram.appendChild(labelEl);
+                diagram.appendChild(offsetEl);
             });
             
-            // Draw component boxes
-            const componentGroups = [
-                { levels: [levels[0], levels[1]], name: 'B125 Cover', className: 'cover' },
-                { levels: [levels[1], levels[2]], name: 'Bedding', className: 'bedding' }
-            ];
+            // Draw laser datum line
+            const laserPixel = getPixelPosition(laserDatum);
+            const laserLineEl = document.createElement('div');
+            laserLineEl.className = 'laser-line';
+            laserLineEl.style.top = laserPixel + 'px';
             
-            let stackBoxIndex = 0;
-            for (let i = 3; i < levels.length - 2; i++) {
-                const lv = levels[i];
-                if (lv.name.includes('Stackabox')) {
-                    componentGroups.push({
-                        levels: [lv, levels[i + 1] || lv],
-                        name: lv.name,
-                        className: 'stackabox'
-                    });
-                    stackBoxIndex++;
+            const laserLabelEl = document.createElement('div');
+            laserLabelEl.className = 'laser-label';
+            laserLabelEl.style.top = laserPixel + 'px';
+            laserLabelEl.textContent = 'LASER ' + laserDatum.toFixed(3);
+            
+            diagram.appendChild(laserLineEl);
+            diagram.appendChild(laserLabelEl);
+            
+            // Draw components
+            for (let i = 0; i < levels.length - 1; i++) {
+                const level = levels[i];
+                if (!level.component) continue;
+                
+                let nextLevel;
+                let height;
+                
+                if (level.name.includes('Unit')) {
+                    // Stackabox unit height
+                    nextLevel = levels[i + 1];
+                    height = STACKABOX_HEIGHT * PIXELS_PER_METRE;
+                } else if (level.name.includes('Sump')) {
+                    // Sump unit height
+                    height = STACKABOX_HEIGHT * PIXELS_PER_METRE;
+                } else {
+                    // Cover or bedding
+                    nextLevel = levels[i + 1];
+                    height = (level.level - nextLevel.level) * PIXELS_PER_METRE;
                 }
-            }
-            
-            // Add sump
-            const sumpLevel = levels[levels.length - 2];
-            componentGroups.push({
-                levels: [sumpLevel, levels[levels.length - 1]],
-                name: '300×300×150 Sump',
-                className: 'sump'
-            });
-            
-            // Add drain
-            const drainLevel = levels[levels.length - 1];
-            componentGroups.push({
-                levels: [drainLevel, drainLevel],
-                name: '100×100 Drain',
-                className: 'drain',
-                height: 20
-            });
-            
-            componentGroups.forEach((group, idx) => {
-                const topLevel = group.levels[0].level;
-                const bottomLevel = group.levels[group.levels.length - 1].level;
-                const topPixel = getPixelHeight(topLevel);
-                const bottomPixel = getPixelHeight(bottomLevel);
-                const height = Math.max(bottomPixel - topPixel, group.height || 30);
                 
-                if (height > 20) {
-                    const box = document.createElement('div');
-                    box.className = `component-box ${group.className}`;
-                    box.style.top = topPixel + 'px';
-                    box.style.height = height + 'px';
-                    box.textContent = group.name;
-                    diagram.appendChild(box);
+                const componentEl = document.createElement('div');
+                componentEl.className = `component ${level.component}`;
+                componentEl.style.top = getPixelPosition(level.level) + 'px';
+                componentEl.style.height = Math.max(height, 20) + 'px';
+                
+                let componentName = level.name;
+                if (level.name.includes('Unit')) {
+                    componentName = level.name;
+                } else if (level.name.includes('Sump')) {
+                    componentName = 'Sump 300×300×150';
+                } else if (level.name.includes('Drain')) {
+                    componentName = 'Drain 100×100';
+                } else {
+                    componentName = level.component.charAt(0).toUpperCase() + level.component.slice(1);
                 }
-            });
+                
+                componentEl.textContent = componentName;
+                diagram.appendChild(componentEl);
+            }
         }
         
         ductLevelInput.addEventListener('input', calculate);
