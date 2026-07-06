@@ -228,12 +228,12 @@
         /* Cross-section styling */
         .pit-drawing {
             position: relative;
-            height: 600px;
+            min-height: 600px;
             border: 1px solid #ddd;
             background: #fafafa;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            padding: 20px 80px 20px 20px;
         }
         
         .pit-ground {
@@ -242,7 +242,7 @@
             background-size: 20px 20px;
             background-position: 0 0, 10px 10px;
             background-color: #c9a167;
-            height: 80px;
+            height: 60px;
             position: relative;
             border-top: 2px solid #333;
         }
@@ -256,56 +256,44 @@
             white-space: nowrap;
         }
         
-        .pit-section {
-            flex: 1;
+        .component-row {
             position: relative;
-            background: white;
-            border-left: 2px solid #333;
-            border-right: 2px solid #333;
             display: flex;
-        }
-        
-        .pit-walls {
-            flex: 1;
-            background: linear-gradient(135deg, rgba(200,200,200,0.2) 25%, transparent 25%, transparent 75%, rgba(200,200,200,0.2) 75%),
-                        linear-gradient(45deg, rgba(200,200,200,0.2) 25%, transparent 25%, transparent 75%, rgba(200,200,200,0.2) 75%);
-            background-size: 15px 15px;
-            border: 1px solid #999;
-            margin: 10px;
-            position: relative;
-        }
-        
-        .pit-content {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            display: flex;
-            flex-direction: column;
+            align-items: stretch;
+            margin: 0;
         }
         
         .level-marker {
-            display: flex;
-            align-items: center;
-            font-size: 10px;
-            font-weight: 600;
-            color: #333;
             position: absolute;
-            gap: 8px;
-        }
-        
-        .level-line {
-            width: 30px;
-            height: 1px;
-            background: #333;
-        }
-        
-        .level-value {
+            right: -75px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            color: #667eea;
             white-space: nowrap;
         }
         
+        .level-line {
+            width: 20px;
+            height: 1px;
+            background: #667eea;
+        }
+        
+        .delta-value {
+            background: white;
+            color: #FF6B6B;
+            padding: 0 4px;
+            font-weight: 700;
+            border: 1px solid #FF6B6B;
+            border-radius: 2px;
+            font-size: 8px;
+        }
+        
         .component {
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -313,7 +301,6 @@
             font-weight: 600;
             text-align: center;
             border: 2px solid;
-            margin: 5px 0;
             color: white;
             padding: 5px;
         }
@@ -321,32 +308,31 @@
         .component.cover {
             background: #FF6B6B;
             border-color: #CC5555;
-            height: 30px;
+            min-height: 30px;
         }
         
         .component.bedding {
             background: #FFA500;
             border-color: #CC8400;
-            height: 25px;
+            min-height: 25px;
         }
         
         .component.stackabox {
             background: #4A90E2;
             border-color: #3A70C2;
-            height: 100px;
-            flex-direction: column;
+            min-height: 80px;
         }
         
         .component.sump {
             background: #764BA2;
             border-color: #564B82;
-            height: 80px;
+            min-height: 80px;
         }
         
         .component.drain {
             background: #0066CC;
             border-color: #004499;
-            height: 20px;
+            min-height: 20px;
             font-size: 9px;
         }
         
@@ -357,34 +343,32 @@
             background-position: 0 0, 5px 5px;
             background-color: #aaa;
             border: 1px solid #666;
-            height: 60px;
+            min-height: 60px;
             color: #333;
         }
         
-        .dimension-line {
-            position: absolute;
-            right: -40px;
+        .laser-datum-row {
+            position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 2px;
-            font-size: 9px;
-            color: #333;
+            padding: 3px 0;
+            border-top: 2px solid #FF6B6B;
+            background: rgba(255, 107, 107, 0.1);
+            margin: 5px 0;
         }
         
-        .dimension-arrow {
-            width: 0;
-            height: 0;
-            border-left: 3px solid transparent;
-            border-right: 3px solid transparent;
+        .laser-datum-row .level-marker {
+            color: #FF6B6B;
+            font-weight: 700;
         }
         
-        .dimension-arrow.up {
-            border-bottom: 5px solid #333;
-        }
-        
-        .dimension-arrow.down {
-            border-top: 5px solid #333;
+        .laser-datum-row .component {
+            background: rgba(255, 107, 107, 0.1);
+            border: none;
+            color: #FF6B6B;
+            min-height: auto;
+            font-weight: 700;
+            font-size: 10px;
         }
         
         .results-section {
@@ -782,66 +766,115 @@
         function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits) {
             pitDrawing.innerHTML = '';
             
-            const totalHeight = FINISHED_LEVEL - invertLevel;
-            const pixelHeight = 500;
-            const pixelsPerMetre = pixelHeight / totalHeight;
-            
-            function getPixelFromBottom(level) {
-                return (level - invertLevel) * pixelsPerMetre;
-            }
-            
-            // Draw concrete base
-            const concreteHeight = 0.060;
-            const concrete = document.createElement('div');
-            concrete.className = 'component concrete';
-            concrete.style.height = (concreteHeight * pixelsPerMetre) + 'px';
-            concrete.textContent = 'C30 Concrete Base';
-            pitDrawing.appendChild(concrete);
-            
-            // Draw drain
-            const drainHeight = getPixelFromBottom(ductLevel - INVERT_OFFSET) - getPixelFromBottom(invertLevel) - concreteHeight * pixelsPerMetre;
-            const drain = document.createElement('div');
-            drain.className = 'component drain';
-            drain.style.height = Math.max(drainHeight, 15) + 'px';
-            drain.textContent = '100×100 Drain';
-            pitDrawing.appendChild(drain);
-            
-            // Draw sump
-            const sumpHeight = STACKABOX_HEIGHT * pixelsPerMetre;
-            const sump = document.createElement('div');
-            sump.className = 'component sump';
-            sump.style.height = sumpHeight + 'px';
-            sump.textContent = 'Sump 300×300×150';
-            pitDrawing.appendChild(sump);
-            
-            // Draw stackabox units
-            for (let i = 1; i <= numUnits; i++) {
-                const stackbox = document.createElement('div');
-                stackbox.className = 'component stackabox';
-                stackbox.style.height = (STACKABOX_HEIGHT * pixelsPerMetre) + 'px';
-                stackbox.textContent = `Stackabox Unit ${i}`;
-                pitDrawing.appendChild(stackbox);
-            }
-            
-            // Draw bedding
-            const bedding = document.createElement('div');
-            bedding.className = 'component bedding';
-            bedding.style.height = (BEDDING_DEPTH * pixelsPerMetre) + 'px';
-            bedding.textContent = 'Bedding 0.030m';
-            pitDrawing.appendChild(bedding);
-            
-            // Draw cover
-            const cover = document.createElement('div');
-            cover.className = 'component cover';
-            cover.style.height = (COVER_DEPTH * pixelsPerMetre) + 'px';
-            cover.textContent = 'B125 Cover 0.040m';
-            pitDrawing.appendChild(cover);
-            
-            // Draw ground
+            // Ground level
             const ground = document.createElement('div');
             ground.className = 'pit-ground';
             ground.innerHTML = `<div class="ground-level">FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD</div>`;
             pitDrawing.appendChild(ground);
+            
+            // Add cover
+            const coverLevel = FINISHED_LEVEL - COVER_DEPTH;
+            const coverRow = document.createElement('div');
+            coverRow.className = 'component-row';
+            coverRow.innerHTML = `
+                <div class="component cover">B125 Cover 0.040m</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${coverLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - coverLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(coverRow);
+            
+            // Add bedding
+            const beddingLevel = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH;
+            const beddingRow = document.createElement('div');
+            beddingRow.className = 'component-row';
+            beddingRow.innerHTML = `
+                <div class="component bedding">Bedding 0.030m</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${beddingLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - beddingLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(beddingRow);
+            
+            // Add duct level marker
+            const ductRow = document.createElement('div');
+            ductRow.className = 'component-row';
+            ductRow.innerHTML = `
+                <div style="flex: 1; border-top: 2px dashed #999; display: flex; align-items: center; padding: 5px; font-size: 10px; font-weight: 600; color: #666;">Lowest Duct Level</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${ductLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(ductRow);
+            
+            // Add stackabox units
+            for (let i = 1; i <= numUnits; i++) {
+                const stackLevel = ductLevel - (i - 1) * STACKABOX_HEIGHT;
+                const stackRow = document.createElement('div');
+                stackRow.className = 'component-row';
+                stackRow.innerHTML = `
+                    <div class="component stackabox">Stackabox Unit ${i}</div>
+                    <div class="level-marker">
+                        <div class="level-line"></div>
+                        <div>${stackLevel.toFixed(3)}</div>
+                        <div class="delta-value">Δ ${(laserDatum - stackLevel).toFixed(3)}</div>
+                    </div>
+                `;
+                pitDrawing.appendChild(stackRow);
+            }
+            
+            // Add sump
+            const sumpLevel = ductLevel - (numUnits * STACKABOX_HEIGHT);
+            const sumpRow = document.createElement('div');
+            sumpRow.className = 'component-row';
+            sumpRow.innerHTML = `
+                <div class="component sump">Sump 300×300×150</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${sumpLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - sumpLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(sumpRow);
+            
+            // Add drain
+            const drainRow = document.createElement('div');
+            drainRow.className = 'component-row';
+            drainRow.innerHTML = `
+                <div class="component drain">100×100 Drain</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>${invertLevel.toFixed(3)}</div>
+                    <div class="delta-value">Δ ${(laserDatum - invertLevel).toFixed(3)}</div>
+                </div>
+            `;
+            pitDrawing.appendChild(drainRow);
+            
+            // Add concrete base
+            const concreteRow = document.createElement('div');
+            concreteRow.className = 'component-row';
+            concreteRow.innerHTML = `
+                <div class="component concrete">C30 Concrete Base</div>
+            `;
+            pitDrawing.appendChild(concreteRow);
+            
+            // Add laser datum marker line
+            const laserRow = document.createElement('div');
+            laserRow.className = 'laser-datum-row';
+            laserRow.innerHTML = `
+                <div class="component">LASER DATUM: ${laserDatum.toFixed(3)} m AOD</div>
+                <div class="level-marker">
+                    <div class="level-line"></div>
+                    <div>LASER</div>
+                </div>
+            `;
+            pitDrawing.appendChild(laserRow);
         }
         
         function generatePDF() {
