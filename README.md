@@ -21,16 +21,19 @@ https://htmlpreview.github.io/?https://github.com/MattR1993/draw-pit-calculator/
 ✅ **User-Definable Inputs**
 - Lowest duct level (mm AOD)
 - Rotating laser datum height (mm AOD)
+- Current ground level and calculation parameters
 
 ✅ **Automatic Calculations**
 - Whole number of 150mm Stackabox units
 - All component level elevations
 - Required depth analysis
+- Invert-to-sump-bottom clearance check
 
 ✅ **Visual Output**
 - Color-coded cross-section diagram
 - Real-time laser datum reference line
 - Component offset visualization
+- Editable parameters reflected in the section view
 
 ✅ **DIP Sheet Table**
 - All level descriptions
