@@ -821,6 +821,7 @@
         const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
         const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
         const CONCRETE_BASE_DEPTH = 0.300; // metres visual concrete thickness
+        const SUMP_TOP_OFFSET_M = 0.250;
         const CROSS_SECTION_TOP_PADDING_M = 0.120;
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
@@ -855,13 +856,13 @@
         function getInvertClearanceStatus(invertClearance) {
             return invertClearance >= 0
                 ? {
-                    unitText: 'm sump below invert',
-                    annotationText: `${invertClearance.toFixed(3)} m clearance`,
+                    unitText: 'm sump above invert',
+                    annotationText: `${invertClearance.toFixed(3)} m above invert`,
                     color: '#1f7a4d'
                 }
                 : {
-                    unitText: 'm sump above invert',
-                    annotationText: `${Math.abs(invertClearance).toFixed(3)} m clash`,
+                    unitText: 'm sump below invert',
+                    annotationText: `${Math.abs(invertClearance).toFixed(3)} m below invert`,
                     color: '#c0392b'
                 };
         }
@@ -937,14 +938,14 @@
             const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
             const invertLevel = ductLevel - invertOffset;
-            const sumpTopLevel = invertLevel + 0.250;
+            const sumpTopLevel = invertLevel + SUMP_TOP_OFFSET_M;
             const minDepthToReachSumpTop = Math.max(0, beddingLevel - sumpTopLevel);
             const minUnitsForSumpTop = Math.ceil(minDepthToReachSumpTop / stackaboxHeight);
             // Ensure at least 1 full stackabox unit sits below the duct and the sump can be shown beneath the stackabox stack.
             const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForSumpTop);
             const actualDepth = numUnits * stackaboxHeight;
             const digDepth = currentGroundLevel - finishedLevel;
-            const invertClearance = invertLevel - sumpTopLevel;
+            const invertClearance = sumpTopLevel - invertLevel;
             const invertClearanceStatus = getInvertClearanceStatus(invertClearance);
             
             // Update result cards
@@ -1037,7 +1038,7 @@
             pitDrawing.innerHTML = '';
 
             const effectiveCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : finishedLevel;
-            const sumpBaseLevel = sumpTopLevel - sumpDepth;
+            const sumpComponentBottomLevel = sumpTopLevel - sumpDepth;
             const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
             const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
             const concreteTopLevel = drainBottomLevel;
@@ -1180,7 +1181,7 @@
                 addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`);
             }
 
-            addComponent(sumpTopLevel, sumpBaseLevel, 'sump', `Sump 300×300×${Math.round(sumpDepth * 1000)}`);
+            addComponent(sumpTopLevel, sumpComponentBottomLevel, 'sump', `Sump 300×300×${Math.round(sumpDepth * 1000)}`);
             addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain');
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
