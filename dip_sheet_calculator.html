@@ -264,7 +264,7 @@
             min-height: 600px;
             border: 1px solid #ddd;
             background: #fafafa;
-            padding: 20px 190px 20px 20px;
+            padding: 20px 220px 20px 20px;
             overflow: hidden;
         }
 
@@ -280,7 +280,7 @@
             position: absolute;
             top: var(--level-label-offset);
             left: 5px;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
             white-space: nowrap;
             padding: 2px 6px;
@@ -306,14 +306,14 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 4px;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
             color: #667eea;
             white-space: nowrap;
             background: rgba(255, 255, 255, 0.96);
             border: 1px solid rgba(102, 126, 234, 0.18);
             border-radius: 8px;
-            padding: 6px 8px;
+            padding: 7px 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             z-index: 6;
         }
@@ -327,11 +327,11 @@
         .delta-value {
             background: white;
             color: #FF6B6B;
-            padding: 0 4px;
+            padding: 1px 5px;
             font-weight: 700;
             border: 1px solid #FF6B6B;
             border-radius: 2px;
-            font-size: 9px;
+            font-size: 11px;
         }
 
         .dimension-annotation {
@@ -367,8 +367,8 @@
             background: rgba(255, 255, 255, 0.96);
             border: 1px solid currentColor;
             border-radius: 999px;
-            padding: 2px 8px;
-            font-size: 10px;
+            padding: 3px 10px;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -378,12 +378,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 700;
             text-align: center;
             border: 2px solid;
             color: white;
-            padding: 5px;
+            padding: 6px;
             height: 100%;
             min-height: 0;
         }
@@ -431,9 +431,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
+            font-size: 11px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             border-radius: 3px;
         }
         
@@ -446,7 +446,7 @@
             background: #0066CC;
             border-color: #004499;
             min-height: 20px;
-            font-size: 9px;
+            font-size: 11px;
         }
         
         .component.concrete {
@@ -754,20 +754,10 @@
                 <h2>Calculation Results</h2>
                 
                 <div class="results-grid">
-                    <div class="result-card">
-                        <div class="result-label">Required Depth</div>
-                        <div class="result-value" id="requiredDepth">-</div>
-                        <div class="result-unit">m</div>
-                    </div>
                     <div class="result-card warning">
                         <div class="result-label">Stackabox Units (Whole)</div>
                         <div class="result-value" id="numUnits">-</div>
                         <div class="result-unit" id="numUnitsUnit">units @ 0.150m each</div>
-                    </div>
-                    <div class="result-card">
-                        <div class="result-label">Actual Depth Built</div>
-                        <div class="result-value" id="actualDepth">-</div>
-                        <div class="result-unit">m</div>
                     </div>
                     <div class="result-card" id="digDepthCard">
                         <div class="result-label">Dig Depth</div>
@@ -818,15 +808,15 @@
     
     <script>
         // Cross-section display scale constants
-        const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
+        const CROSS_SECTION_SCALE_PX_PER_M = 320; // pixels per metre
         const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
         const CONCRETE_BASE_DEPTH = 0.300; // metres visual concrete thickness
         const SUMP_TOP_OFFSET_M = 0.250;
-        const CROSS_SECTION_TOP_PADDING_M = 0.120;
-        const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
-        const MIN_CROSS_SECTION_HEIGHT_PX = 600;
+        const CROSS_SECTION_TOP_PADDING_M = 0.150;
+        const CROSS_SECTION_BOTTOM_PADDING_M = 0.150;
+        const MIN_CROSS_SECTION_HEIGHT_PX = 900;
         const MIN_COMPONENT_HEIGHT_PX = 1;
-        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // minimum visual height needed to keep the thin 40mm cover row legible
+        const MIN_COVER_COMPONENT_HEIGHT_PX = 40; // minimum visual height needed to keep the thin 40mm cover row legible
         const MIN_DIMENSION_ANNOTATION_HEIGHT_PX = 16;
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
@@ -949,9 +939,7 @@
             const invertClearanceStatus = getInvertClearanceStatus(invertClearance);
             
             // Update result cards
-            document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
             document.getElementById('numUnits').textContent = numUnits;
-            document.getElementById('actualDepth').textContent = actualDepth.toFixed(3);
             document.getElementById('numUnitsUnit').textContent = `units @ ${stackaboxHeight.toFixed(3)}m each`;
             const digDepthCard = document.getElementById('digDepthCard');
             document.getElementById('digDepth').textContent = Math.abs(digDepth).toFixed(3);
@@ -1133,7 +1121,7 @@
                 `
                     <div style="text-align: center;">
                         <div>B125 Cover</div>
-                        <div style="font-size: 10px;">(${coverDepth.toFixed(3)}m)</div>
+                        <div style="font-size: 12px;">(${coverDepth.toFixed(3)}m)</div>
                     </div>
                 `,
                null,
@@ -1147,7 +1135,7 @@
                 `
                     <div style="text-align: center;">
                         <div>Bedding</div>
-                        <div style="font-size: 10px;">(${beddingDepth.toFixed(3)}m)</div>
+                        <div style="font-size: 12px;">(${beddingDepth.toFixed(3)}m)</div>
                     </div>
                 `
             );
@@ -1171,7 +1159,7 @@
                     <div class="duct-unit-content">
                         Stackabox Unit ${ductUnitIndex + 1}
                         <div class="duct-core">Duct Ø</div>
-                        <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
+                        <div style="font-size: 11px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
                 `
             );
