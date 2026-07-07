@@ -1099,7 +1099,7 @@
                 row.style.height = `${heightPx}px`;
                 row.innerHTML = `<div class="component ${componentClass}">${contentHtml}</div>`;
                 pitDrawing.appendChild(row);
-                if (markerFn) markerFn(levelToTopPx(componentTopLevel));
+                if (typeof markerFn === 'function') markerFn(levelToTopPx(componentTopLevel));
             };
 
             const addLevelLine = (label, level, color, dashed = false, showDelta = true) => {
@@ -1136,6 +1136,7 @@
                         <div style="font-size: 10px;">(${coverDepth.toFixed(3)}m)</div>
                     </div>
                 `,
+                null,
                 MIN_COVER_COMPONENT_HEIGHT_PX
             );
 
