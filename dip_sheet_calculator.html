@@ -721,6 +721,7 @@
         const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // minimum visual height needed to keep the thin 40mm cover row legible
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
+        const LEVEL_MARKER_VERTICAL_OFFSET_PX = 10; // px above the component/line top to centre the marker label
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -865,7 +866,7 @@
                 const markerEl = document.createElement('div');
                 markerEl.className = 'level-marker';
                 markerEl.style.color = color;
-                markerEl.style.top = `${topPx - 10}px`;
+                markerEl.style.top = `${topPx - LEVEL_MARKER_VERTICAL_OFFSET_PX}px`;
                 markerEl.innerHTML = `
                     <div class="level-line" style="background: ${color};"></div>
                     <div>${level.toFixed(3)} m AOD</div>
@@ -903,7 +904,7 @@
                 const markerEl = document.createElement('div');
                 markerEl.className = 'level-marker';
                 markerEl.style.color = color;
-                markerEl.style.top = `${levelToTopPx(level) - 10}px`;
+                markerEl.style.top = `${levelToTopPx(level) - LEVEL_MARKER_VERTICAL_OFFSET_PX}px`;
                 markerEl.innerHTML = `
                     <div class="level-line" style="background: ${color};"></div>
                     <div>${level.toFixed(3)} m AOD</div>
