@@ -734,7 +734,7 @@
                             <span class="fixed-param-suffix">m</span>
                         </div>
                     </div>
-                    <div class="fixed-param-note">These values update the drawing and Dip Sheet immediately.</div>
+                    <div class="fixed-param-note">These values update the drawing and DIP Sheet immediately.</div>
                     <div class="error" id="parameterError"></div>
                 </div>
             </div>
@@ -876,7 +876,7 @@
                 return;
             }
             if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
-                parameterError.textContent = 'Invalid parameters: finished level, stackabox height, and sump depth must be greater than zero. Cover, bedding, and invert offset must be zero or greater.';
+                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be positive. Cover, bedding, and invert offset cannot be negative.';
                 parameterError.classList.add('show');
                 return;
             }
@@ -923,7 +923,8 @@
             const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
             const invertLevel = ductLevel - invertOffset;
-            const minUnitsForInvertClearance = Math.ceil(Math.max(0, beddingLevel - (invertLevel + sumpDepth)) / stackaboxHeight);
+            const requiredDepthForClearance = Math.max(0, beddingLevel - (invertLevel + sumpDepth));
+            const minUnitsForInvertClearance = Math.ceil(requiredDepthForClearance / stackaboxHeight);
             // Ensure at least 1 full stackabox unit sits below the duct and the sump reaches the invert.
             const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForInvertClearance);
             const actualDepth = numUnits * stackaboxHeight;
