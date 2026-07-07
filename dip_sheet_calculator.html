@@ -734,7 +734,7 @@
                             <span class="fixed-param-suffix">m</span>
                         </div>
                     </div>
-                    <div class="fixed-param-note">These values update the drawing and dip sheet immediately.</div>
+                    <div class="fixed-param-note">These values update the drawing and Dip Sheet immediately.</div>
                     <div class="error" id="parameterError"></div>
                 </div>
             </div>
@@ -868,13 +868,13 @@
             const laserError = document.getElementById('laserError');
             const parameterError = document.getElementById('parameterError');
 
-            if (!Object.values({ finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset }).every(Number.isFinite)) {
+            if (![finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset].every(Number.isFinite)) {
                 parameterError.textContent = 'Please enter valid fixed parameter values';
                 parameterError.classList.add('show');
                 return;
             }
             if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
-                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be greater than zero; cover, bedding, and invert offset cannot be negative';
+                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be greater than zero; cover, bedding, and invert offset must be zero or greater';
                 parameterError.classList.add('show');
                 return;
             }
