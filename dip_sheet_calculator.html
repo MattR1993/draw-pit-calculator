@@ -227,6 +227,7 @@
         
         /* Cross-section styling */
         .pit-drawing {
+            --level-label-offset: -22px;
             position: relative;
             min-height: 600px;
             border: 1px solid #ddd;
@@ -245,7 +246,7 @@
 
         .level-line-label {
             position: absolute;
-            top: -22px;
+            top: var(--level-label-offset);
             left: 5px;
             font-size: 11px;
             font-weight: 700;
@@ -716,6 +717,9 @@
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
+        const MIN_COVER_COMPONENT_HEIGHT_PX = 32;
+        const COVER_MARKER_COLOR = '#CC5555';
+        const BEDDING_MARKER_COLOR = '#CC8400';
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -910,8 +914,8 @@
                     </div>
                 `,
                 {
-                    markerHtml: createLevelMarkerHtml(coverLevel, '#CC5555'),
-                    minHeightPx: 32
+                    markerHtml: createLevelMarkerHtml(coverLevel, COVER_MARKER_COLOR),
+                    minHeightPx: MIN_COVER_COMPONENT_HEIGHT_PX
                 }
             );
 
@@ -926,7 +930,7 @@
                     </div>
                 `,
                 {
-                    markerHtml: createLevelMarkerHtml(beddingLevel, '#CC8400')
+                    markerHtml: createLevelMarkerHtml(beddingLevel, BEDDING_MARKER_COLOR)
                 }
             );
 
