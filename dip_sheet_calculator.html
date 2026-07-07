@@ -866,7 +866,7 @@
             };
 
             const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, componentOptions = {}) => {
-                const options = componentOptions && typeof componentOptions === 'object' ? componentOptions : {};
+                const options = componentOptions;
                 const {
                     markerHtml = '',
                     minHeightPx = MIN_COMPONENT_HEIGHT_PX
