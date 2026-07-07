@@ -695,43 +695,43 @@
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="finishedLevel">Finished Compound Level</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="finishedLevel" value="6.100" step="0.001" min="0">
-                            <span class="fixed-param-suffix">m AOD</span>
+                            <input type="number" id="finishedLevel" value="6.100" step="0.001" min="0" aria-describedby="finishedLevelUnit">
+                            <span class="fixed-param-suffix" id="finishedLevelUnit">m AOD</span>
                         </div>
                     </div>
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="coverDepth">Cover Depth</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="coverDepth" value="0.040" step="0.001" min="0">
-                            <span class="fixed-param-suffix">m</span>
+                            <input type="number" id="coverDepth" value="0.040" step="0.001" min="0" aria-describedby="coverDepthUnit">
+                            <span class="fixed-param-suffix" id="coverDepthUnit">m</span>
                         </div>
                     </div>
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="beddingDepth">Bedding Depth</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="beddingDepth" value="0.030" step="0.001" min="0">
-                            <span class="fixed-param-suffix">m</span>
+                            <input type="number" id="beddingDepth" value="0.030" step="0.001" min="0" aria-describedby="beddingDepthUnit">
+                            <span class="fixed-param-suffix" id="beddingDepthUnit">m</span>
                         </div>
                     </div>
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="stackaboxHeight">Stackabox Unit Height</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="stackaboxHeight" value="0.150" step="0.001" min="0.001">
-                            <span class="fixed-param-suffix">m</span>
+                            <input type="number" id="stackaboxHeight" value="0.150" step="0.001" min="0.001" aria-describedby="stackaboxHeightUnit">
+                            <span class="fixed-param-suffix" id="stackaboxHeightUnit">m</span>
                         </div>
                     </div>
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="sumpDepth">Sump Depth</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="sumpDepth" value="0.150" step="0.001" min="0.001">
-                            <span class="fixed-param-suffix">m</span>
+                            <input type="number" id="sumpDepth" value="0.150" step="0.001" min="0.001" aria-describedby="sumpDepthUnit">
+                            <span class="fixed-param-suffix" id="sumpDepthUnit">m</span>
                         </div>
                     </div>
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="invertOffset">Invert Below Duct</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="invertOffset" value="0.450" step="0.001" min="0">
-                            <span class="fixed-param-suffix">m</span>
+                            <input type="number" id="invertOffset" value="0.450" step="0.001" min="0" aria-describedby="invertOffsetUnit">
+                            <span class="fixed-param-suffix" id="invertOffsetUnit">m</span>
                         </div>
                     </div>
                     <div class="fixed-param-note">These values update the drawing and DIP Sheet immediately.</div>
@@ -852,6 +852,20 @@
             );
         }
 
+        function getInvertClearanceStatus(invertClearance) {
+            return invertClearance >= 0
+                ? {
+                    unitText: 'm sump below invert',
+                    annotationText: `${invertClearance.toFixed(3)} m clearance`,
+                    color: '#1f7a4d'
+                }
+                : {
+                    unitText: 'm sump above invert',
+                    annotationText: `${Math.abs(invertClearance).toFixed(3)} m clash`,
+                    color: '#c0392b'
+                };
+        }
+
         function calculate() {
             const ductLevel = parseFloat(ductLevelInput.value);
             const laserDatum = parseFloat(laserDatumInput.value);
@@ -876,7 +890,7 @@
                 return;
             }
             if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
-                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be positive. Cover depth, bedding depth, and invert offset cannot be negative.';
+                parameterError.textContent = 'Invalid parameters: finished level, stackabox height, and sump depth must be positive; cover depth, bedding depth, and invert offset cannot be negative.';
                 parameterError.classList.add('show');
                 return;
             }
@@ -923,8 +937,8 @@
             const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
             const invertLevel = ductLevel - invertOffset;
-            const requiredDepthForClearance = Math.max(0, beddingLevel - (invertLevel + sumpDepth));
-            const minUnitsForInvertClearance = Math.ceil(requiredDepthForClearance / stackaboxHeight);
+            const minDepthToReachInvert = Math.max(0, beddingLevel - (invertLevel + sumpDepth));
+            const minUnitsForInvertClearance = Math.ceil(minDepthToReachInvert / stackaboxHeight);
             // Ensure at least 1 full stackabox unit sits below the duct and the sump reaches the invert.
             const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForInvertClearance);
             const actualDepth = numUnits * stackaboxHeight;
@@ -932,6 +946,7 @@
             const sumpBottomLevel = sumpTopLevel - sumpDepth;
             const digDepth = currentGroundLevel - finishedLevel;
             const invertClearance = invertLevel - sumpBottomLevel;
+            const invertClearanceStatus = getInvertClearanceStatus(invertClearance);
             
             // Update result cards
             document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
@@ -944,7 +959,7 @@
             digDepthCard.className = digDepth >= 0 ? 'result-card' : 'result-card warning';
             const invertClearanceCard = document.getElementById('invertClearanceCard');
             document.getElementById('invertClearance').textContent = Math.abs(invertClearance).toFixed(3);
-            document.getElementById('invertClearanceUnit').textContent = invertClearance >= 0 ? 'm sump below invert' : 'm invert below sump';
+            document.getElementById('invertClearanceUnit').textContent = invertClearanceStatus.unitText;
             invertClearanceCard.className = invertClearance >= 0 ? 'result-card' : 'result-card warning';
             
             // Build levels array
@@ -1000,7 +1015,8 @@
                 beddingDepth,
                 stackaboxHeight,
                 sumpDepth,
-                invertClearance
+                invertClearance,
+                invertClearanceStatus
             });
         }
         
@@ -1019,7 +1035,8 @@
             beddingDepth,
             stackaboxHeight,
             sumpDepth,
-            invertClearance
+            invertClearance,
+            invertClearanceStatus
         }) {
             pitDrawing.innerHTML = '';
 
@@ -1181,8 +1198,8 @@
             addDimensionAnnotation(
                 invertLevel,
                 sumpBottomLevel,
-                invertClearance >= 0 ? `${invertClearance.toFixed(3)} m clearance` : `${Math.abs(invertClearance).toFixed(3)} m clash`,
-                invertClearance >= 0 ? '#1f7a4d' : '#c0392b'
+                invertClearanceStatus.annotationText,
+                invertClearanceStatus.color
             );
         }
         
