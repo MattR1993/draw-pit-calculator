@@ -866,11 +866,10 @@
             };
 
             const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, componentOptions = {}) => {
-                const options = componentOptions;
                 const {
                     markerHtml = '',
                     minHeightPx = MIN_COMPONENT_HEIGHT_PX
-                } = options;
+                } = componentOptions;
                 const componentTopLevel = Math.max(topLevel, bottomLevel);
                 const componentBottomLevel = Math.min(topLevel, bottomLevel);
                 const heightPx = Math.max(minHeightPx, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
