@@ -818,6 +818,7 @@
         const MIN_COMPONENT_HEIGHT_PX = 1;
         const MIN_COVER_COMPONENT_HEIGHT_PX = 40; // minimum visual height needed to keep the thin 40mm cover row legible
         const MIN_DIMENSION_ANNOTATION_HEIGHT_PX = 16;
+        const MIN_DUCT_CLEARANCE_M = 0.050; // minimum clearance between lowest stackabox top and duct level
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
         const LEVEL_MARKER_VERTICAL_OFFSET_PX = 10; // px above the component/line top to centre the marker label
@@ -932,7 +933,11 @@
             const minDepthToReachSumpTop = Math.max(0, beddingLevel - sumpTopLevel);
             const minUnitsForSumpTop = Math.ceil(minDepthToReachSumpTop / stackaboxHeight);
             // Ensure at least 1 full stackabox unit sits below the duct and the sump can be shown beneath the stackabox stack.
-            const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForSumpTop);
+            let numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForSumpTop);
+            // Ensure the top of the lowest (bottom-most) stackabox is at least 50mm below the duct level
+            if (beddingLevel - (numUnits - 1) * stackaboxHeight > ductLevel - MIN_DUCT_CLEARANCE_M) {
+                numUnits += 1;
+            }
             const actualDepth = numUnits * stackaboxHeight;
             const digDepth = currentGroundLevel - invertLevel;
             const invertClearance = sumpTopLevel - invertLevel;
