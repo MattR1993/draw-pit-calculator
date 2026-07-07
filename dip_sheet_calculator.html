@@ -231,47 +231,41 @@
             min-height: 600px;
             border: 1px solid #ddd;
             background: #fafafa;
-            display: flex;
-            flex-direction: column;
             padding: 20px 100px 20px 20px;
-        }
-        
-        .current-ground-row {
-            position: relative;
-            border-top: 2px dashed #228B22;
-            background: rgba(34, 139, 34, 0.05);
-            min-height: 30px;
+            overflow: hidden;
         }
 
-        .current-ground-label {
+        .level-line-row {
             position: absolute;
-            top: 3px;
+            left: 0;
+            right: 0;
+            border-top: 2px solid #333;
+            z-index: 5;
+        }
+
+        .level-line-label {
+            position: absolute;
+            top: -15px;
             left: 5px;
             font-size: 11px;
             font-weight: 700;
-            color: #228B22;
             white-space: nowrap;
-        }
-
-        .finished-level-row {
-            position: relative;
-            border-top: 3px solid #333;
-            background: rgba(0, 0, 0, 0.03);
-            padding: 3px 0 3px 5px;
-            font-size: 11px;
-            font-weight: 700;
         }
         
         .component-row {
-            position: relative;
+            position: absolute;
+            left: 0;
+            right: 0;
             display: flex;
             align-items: stretch;
             margin: 0;
+            z-index: 2;
         }
         
         .level-marker {
             position: absolute;
             right: -95px;
+            top: -10px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -309,30 +303,28 @@
             border: 2px solid;
             color: white;
             padding: 5px;
+            height: 100%;
+            min-height: 0;
         }
         
         .component.cover {
             background: #FF6B6B;
             border-color: #CC5555;
-            min-height: 30px;
         }
         
         .component.bedding {
             background: #FFA500;
             border-color: #CC8400;
-            min-height: 25px;
         }
         
         .component.stackabox {
             background: #4A90E2;
             border-color: #3A70C2;
-            min-height: 80px;
         }
         
         .component.stackabox-with-duct {
             background: linear-gradient(90deg, #4A90E2 0%, #4A90E2 30%, #2E5FE2 30%, #2E5FE2 70%, #4A90E2 70%, #4A90E2 100%);
             border-color: #3A70C2;
-            min-height: 80px;
             position: relative;
         }
         
@@ -350,7 +342,9 @@
             right: 30%;
             top: 50%;
             transform: translateY(-50%);
-            height: 40px;
+            height: 70%;
+            min-height: 14px;
+            max-height: 30px;
             background: #2E5FE2;
             border: 2px dashed #0066CC;
             display: flex;
@@ -365,7 +359,6 @@
         .component.sump {
             background: #764BA2;
             border-color: #564B82;
-            min-height: 80px;
         }
         
         .component.drain {
@@ -382,32 +375,7 @@
             background-position: 0 0, 5px 5px;
             background-color: #aaa;
             border: 1px solid #666;
-            min-height: 60px;
             color: #333;
-        }
-        
-        .laser-datum-row {
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding: 3px 0;
-            border-top: 2px solid #FF6B6B;
-            background: rgba(255, 107, 107, 0.1);
-            margin: 5px 0;
-        }
-        
-        .laser-datum-row .level-marker {
-            color: #FF6B6B;
-            font-weight: 700;
-        }
-        
-        .laser-datum-row .component {
-            background: rgba(255, 107, 107, 0.1);
-            border: none;
-            color: #FF6B6B;
-            min-height: auto;
-            font-weight: 700;
-            font-size: 10px;
         }
         
         .results-section {
@@ -737,9 +705,13 @@
         const INVERT_OFFSET = 0.450;
         
         // Cross-section display scale constants
-        const DIG_DEPTH_SCALE_PX_PER_M = 200;  // pixels per metre for dig depth indicator
-        const MIN_GROUND_HEIGHT_PX = 50;        // minimum height in px when dig depth > 0
-        const DEFAULT_GROUND_HEIGHT_PX = 20;    // height in px when current ground <= finished level
+        const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
+        const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
+        const CONCRETE_BASE_DEPTH = 0.300; // metres visual concrete thickness
+        const CROSS_SECTION_TOP_PADDING_M = 0.120;
+        const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
+        const MIN_CROSS_SECTION_HEIGHT_PX = 600;
+        const MIN_COMPONENT_HEIGHT_PX = 1;
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -855,199 +827,143 @@
         
         function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel) {
             pitDrawing.innerHTML = '';
-            
-            // Current ground level indicator (green dashed line)
-            if (!isNaN(currentGroundLevel)) {
-                const digDepth = currentGroundLevel - FINISHED_LEVEL;
-                const extraHeightPx = digDepth > 0 ? Math.max(MIN_GROUND_HEIGHT_PX, digDepth * DIG_DEPTH_SCALE_PX_PER_M) : DEFAULT_GROUND_HEIGHT_PX;
-                const groundRow = document.createElement('div');
-                groundRow.className = 'current-ground-row';
-                groundRow.style.height = extraHeightPx + 'px';
-                groundRow.innerHTML = `
-                    <div class="current-ground-label">CURRENT GROUND: ${currentGroundLevel.toFixed(3)} m AOD</div>
-                    <div class="level-marker" style="color: #228B22;">
-                        <div class="level-line" style="background: #228B22;"></div>
-                        <div>${currentGroundLevel.toFixed(3)}</div>
+
+            const effectiveCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : FINISHED_LEVEL;
+            const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
+            const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
+            const concreteTopLevel = drainBottomLevel;
+            const concreteBottomLevel = concreteTopLevel - CONCRETE_BASE_DEPTH;
+
+            const highestLevel = Math.max(FINISHED_LEVEL, laserDatum, effectiveCurrentGroundLevel);
+            const lowestLevel = Math.min(concreteBottomLevel, sumpBottomLevel, invertLevel);
+            const drawingTopLevel = highestLevel + CROSS_SECTION_TOP_PADDING_M;
+            const drawingBottomLevel = lowestLevel - CROSS_SECTION_BOTTOM_PADDING_M;
+            const totalHeightPx = Math.max(MIN_CROSS_SECTION_HEIGHT_PX, (drawingTopLevel - drawingBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
+
+            pitDrawing.style.height = `${totalHeightPx}px`;
+
+            // Convert an elevation value (m AOD) into vertical pixels from the top of the drawing area.
+            const levelToTopPx = (level) => (drawingTopLevel - level) * CROSS_SECTION_SCALE_PX_PER_M;
+
+            const createLevelMarkerHtml = (level, color = '#667eea', extraHtml = '') => {
+                return `
+                    <div class="level-marker" style="color: ${color};">
+                        <div class="level-line" style="background: ${color};"></div>
+                        <div>${level.toFixed(3)}</div>
+                        <div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>
+                        ${extraHtml}
                     </div>
                 `;
-                pitDrawing.appendChild(groundRow);
-            }
-            
-            // Finished level marker (replaces brown hatching pit-ground)
-            const finishedRow = document.createElement('div');
-            finishedRow.className = 'finished-level-row';
-            finishedRow.innerHTML = `
-                FINISHED: ${FINISHED_LEVEL.toFixed(3)} m AOD
-                <div class="level-marker">
-                    <div class="level-line" style="background: #333;"></div>
-                    <div style="color: #333;">${FINISHED_LEVEL.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - FINISHED_LEVEL).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(finishedRow);
-            
-            // Add cover (B125 lid) – from FL down to coverLevel
-            const coverRow = document.createElement('div');
-            coverRow.className = 'component-row';
-            coverRow.innerHTML = `
-                <div class="component cover" style="min-height: ${(COVER_DEPTH * 200) + 'px'};">
+            };
+
+            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerHtml = '') => {
+                const componentTopLevel = Math.max(topLevel, bottomLevel);
+                const componentBottomLevel = Math.min(topLevel, bottomLevel);
+                const heightPx = Math.max(MIN_COMPONENT_HEIGHT_PX, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
+                const row = document.createElement('div');
+                row.className = 'component-row';
+                row.style.top = `${levelToTopPx(componentTopLevel)}px`;
+                row.style.height = `${heightPx}px`;
+                row.innerHTML = `
+                    <div class="component ${componentClass}">${contentHtml}</div>
+                    ${markerHtml}
+                `;
+                pitDrawing.appendChild(row);
+            };
+
+            const addLevelLine = (label, level, color, dashed = false, showDelta = true) => {
+                const lineRow = document.createElement('div');
+                lineRow.className = 'level-line-row';
+                lineRow.style.top = `${levelToTopPx(level)}px`;
+                lineRow.style.borderTopColor = color;
+                lineRow.style.borderTopStyle = dashed ? 'dashed' : 'solid';
+                const markerDeltaHtml = showDelta
+                    ? `<div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>`
+                    : `<div class="delta-value" style="color: ${color}; border-color: ${color};">LASER</div>`;
+                lineRow.innerHTML = `
+                    <div class="level-line-label" style="color: ${color};">${label}: ${level.toFixed(3)} m AOD</div>
+                    <div class="level-marker" style="color: ${color};">
+                        <div class="level-line" style="background: ${color};"></div>
+                        <div>${level.toFixed(3)}</div>
+                        ${markerDeltaHtml}
+                    </div>
+                `;
+                pitDrawing.appendChild(lineRow);
+            };
+
+            addComponent(
+                FINISHED_LEVEL,
+                coverLevel,
+                'cover',
+                `
                     <div style="text-align: center;">
                         <div>B125 Cover</div>
                         <div style="font-size: 10px;">(0.040m)</div>
                     </div>
-                </div>
-            `;
-            pitDrawing.appendChild(coverRow);
-            
-            // Add bedding layer – from coverLevel down to beddingLevel
-            const beddingRow = document.createElement('div');
-            beddingRow.className = 'component-row';
-            beddingRow.innerHTML = `
-                <div class="component bedding" style="min-height: ${(BEDDING_DEPTH * 200) + 'px'};">
+                `
+            );
+
+            addComponent(
+                coverLevel,
+                beddingLevel,
+                'bedding',
+                `
                     <div style="text-align: center;">
                         <div>Bedding</div>
                         <div style="font-size: 10px;">(0.030m)</div>
                     </div>
-                </div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${coverLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - coverLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(beddingRow);
-            
-            // Add bedding level marker (top of first stackabox)
-            const beddingMarkerRow = document.createElement('div');
-            beddingMarkerRow.className = 'component-row';
-            beddingMarkerRow.innerHTML = `
-                <div style="flex: 1; border-top: 2px dashed #999; display: flex; align-items: center; padding: 5px; font-size: 10px; font-weight: 600; color: #666;"></div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${beddingLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - beddingLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(beddingMarkerRow);
-            
-            // Calculate how many complete stackabox units sit entirely above the duct centre
+                `,
+                createLevelMarkerHtml(coverLevel)
+            );
+
             const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / STACKABOX_HEIGHT);
-            // Index (0-based from beddingLevel) of the unit that the duct passes through
             const ductUnitIndex = unitsAboveDuct;
-            
-            // Draw stackabox units ABOVE the duct
+
             for (let i = 0; i < unitsAboveDuct; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
-                const stackRow = document.createElement('div');
-                stackRow.className = 'component-row';
-                stackRow.innerHTML = `
-                    <div class="component stackabox">Stackabox Unit ${i + 1}</div>
-                    <div class="level-marker">
-                        <div class="level-line"></div>
-                        <div>${unitTopLevel.toFixed(3)}</div>
-                        <div class="delta-value">Δ ${(laserDatum - unitTopLevel).toFixed(3)}</div>
-                    </div>
-                `;
-                pitDrawing.appendChild(stackRow);
+                const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
             }
-            
-            // Draw the unit that the duct passes through (with duct core and both level markers)
+
             const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
-            const ductUnitRow = document.createElement('div');
-            ductUnitRow.className = 'component-row';
-            ductUnitRow.innerHTML = `
-                <div class="component stackabox-with-duct">
+            const ductUnitBottomLevel = ductUnitTopLevel - STACKABOX_HEIGHT;
+            addComponent(
+                ductUnitTopLevel,
+                ductUnitBottomLevel,
+                'stackabox-with-duct',
+                `
                     <div class="duct-unit-content">
                         Stackabox Unit ${ductUnitIndex + 1}
                         <div class="duct-core">Duct Ø</div>
                         <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
-                </div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${ductUnitTopLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - ductUnitTopLevel).toFixed(3)}</div>
-                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
-                    <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
-                    <div class="delta-value" style="color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(ductUnitRow);
-            
-            // Draw any stackabox units BELOW the duct
+                `,
+                createLevelMarkerHtml(
+                    ductUnitTopLevel,
+                    '#667eea',
+                    `
+                        <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
+                        <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
+                        <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
+                    `
+                )
+            );
+
             for (let i = ductUnitIndex + 1; i < numUnits; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
-                const stackRow = document.createElement('div');
-                stackRow.className = 'component-row';
-                stackRow.innerHTML = `
-                    <div class="component stackabox">Stackabox Unit ${i + 1}</div>
-                    <div class="level-marker">
-                        <div class="level-line"></div>
-                        <div>${unitTopLevel.toFixed(3)}</div>
-                        <div class="delta-value">Δ ${(laserDatum - unitTopLevel).toFixed(3)}</div>
-                    </div>
-                `;
-                pitDrawing.appendChild(stackRow);
+                const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
             }
-            
-            // Add sump (top level marker + body + bottom level marker)
-            const sumpRow = document.createElement('div');
-            sumpRow.className = 'component-row';
-            sumpRow.innerHTML = `
-                <div class="component sump">Sump 300×300×150</div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${sumpTopLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - sumpTopLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(sumpRow);
-            
-            // Add sump bottom level marker
-            const sumpBottomRow = document.createElement('div');
-            sumpBottomRow.className = 'component-row';
-            sumpBottomRow.innerHTML = `
-                <div style="flex: 1; border-top: 2px dashed #764BA2; display: flex; align-items: center; padding: 5px; font-size: 10px; font-weight: 600; color: #764BA2;">Sump Bottom</div>
-                <div class="level-marker" style="color: #764BA2;">
-                    <div class="level-line" style="border-color: #764BA2;"></div>
-                    <div>${sumpBottomLevel.toFixed(3)}</div>
-                    <div class="delta-value" style="color: #764BA2; border-color: #764BA2;">Δ ${(laserDatum - sumpBottomLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(sumpBottomRow);
-            
-            // Add drain
-            const drainRow = document.createElement('div');
-            drainRow.className = 'component-row';
-            drainRow.innerHTML = `
-                <div class="component drain">100×100 Drain</div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>${invertLevel.toFixed(3)}</div>
-                    <div class="delta-value">Δ ${(laserDatum - invertLevel).toFixed(3)}</div>
-                </div>
-            `;
-            pitDrawing.appendChild(drainRow);
-            
-            // Add concrete base
-            const concreteRow = document.createElement('div');
-            concreteRow.className = 'component-row';
-            concreteRow.innerHTML = `
-                <div class="component concrete">C30 Concrete Base</div>
-            `;
-            pitDrawing.appendChild(concreteRow);
-            
-            // Add laser datum marker line
-            const laserRow = document.createElement('div');
-            laserRow.className = 'laser-datum-row';
-            laserRow.innerHTML = `
-                <div class="component">LASER DATUM: ${laserDatum.toFixed(3)} m AOD</div>
-                <div class="level-marker">
-                    <div class="level-line"></div>
-                    <div>LASER</div>
-                </div>
-            `;
-            pitDrawing.appendChild(laserRow);
+
+            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', createLevelMarkerHtml(sumpTopLevel));
+            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', createLevelMarkerHtml(invertLevel));
+            addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
+
+            addLevelLine('CURRENT GROUND', effectiveCurrentGroundLevel, '#228B22', true);
+            addLevelLine('FINISHED', FINISHED_LEVEL, '#333');
+            addLevelLine('BEDDING LEVEL', beddingLevel, '#999', true);
+            addLevelLine('SUMP BOTTOM', sumpBottomLevel, '#764BA2', true);
+            addLevelLine('LASER DATUM', laserDatum, '#FF6B6B', false, false);
         }
         
         function generatePDF() {
