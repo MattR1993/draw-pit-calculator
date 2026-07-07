@@ -167,14 +167,16 @@
         }
         
         .fixed-param {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(130px, 160px);
+            gap: 12px;
+            align-items: center;
+            padding: 10px 0;
             border-bottom: 1px solid #f0f0f0;
             font-size: 13px;
         }
         
-        .fixed-param:last-child {
+        .fixed-param:last-of-type {
             border-bottom: none;
         }
         
@@ -182,9 +184,38 @@
             color: #666;
         }
         
-        .fixed-param-value {
+        .fixed-param-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fixed-param-input input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d5d9e2;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .fixed-param-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .fixed-param-suffix {
             font-weight: 600;
             color: #333;
+            min-width: 42px;
+            text-align: left;
+        }
+
+        .fixed-param-note {
+            margin-top: 12px;
+            font-size: 12px;
+            color: #666;
         }
         
         .cross-section {
@@ -233,7 +264,7 @@
             min-height: 600px;
             border: 1px solid #ddd;
             background: #fafafa;
-            padding: 20px 100px 20px 20px;
+            padding: 20px 190px 20px 20px;
             overflow: hidden;
         }
 
@@ -270,20 +301,25 @@
         
         .level-marker {
             position: absolute;
-            right: 5px;
+            right: 10px;
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 3px;
-            font-size: 9px;
+            align-items: flex-start;
+            gap: 4px;
+            font-size: 10px;
             font-weight: 600;
             color: #667eea;
             white-space: nowrap;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(102, 126, 234, 0.18);
+            border-radius: 8px;
+            padding: 6px 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             z-index: 6;
         }
         
         .level-line {
-            width: 20px;
+            width: 16px;
             height: 1px;
             background: #667eea;
         }
@@ -295,7 +331,46 @@
             font-weight: 700;
             border: 1px solid #FF6B6B;
             border-radius: 2px;
-            font-size: 8px;
+            font-size: 9px;
+        }
+
+        .dimension-annotation {
+            position: absolute;
+            width: 0;
+            border-left: 2px dashed currentColor;
+            z-index: 4;
+        }
+
+        .dimension-annotation::before,
+        .dimension-annotation::after {
+            content: '';
+            position: absolute;
+            left: -5px;
+            width: 10px;
+            height: 2px;
+            background: currentColor;
+        }
+
+        .dimension-annotation::before {
+            top: 0;
+        }
+
+        .dimension-annotation::after {
+            bottom: 0;
+        }
+
+        .dimension-label {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid currentColor;
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
         }
         
         .component {
@@ -485,7 +560,7 @@
             font-weight: 600;
             color: #000;
         }
-        
+
         .error {
             color: #FF6B6B;
             font-size: 12px;
@@ -525,6 +600,16 @@
         @media (max-width: 1024px) {
             .content {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .fixed-param {
+                grid-template-columns: 1fr;
+            }
+
+            .pit-drawing {
+                padding-right: 160px;
             }
         }
         
@@ -608,25 +693,49 @@
                 <div class="fixed-params">
                     <h3>Reference Levels (Metres)</h3>
                     <div class="fixed-param">
-                        <span class="fixed-param-label">Finished Compound Level</span>
-                        <span class="fixed-param-value">6.100 m AOD</span>
+                        <label class="fixed-param-label" for="finishedLevel">Finished Compound Level</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="finishedLevel" value="6.100" step="0.001">
+                            <span class="fixed-param-suffix">m AOD</span>
+                        </div>
                     </div>
                     <div class="fixed-param">
-                        <span class="fixed-param-label">Cover Depth</span>
-                        <span class="fixed-param-value">0.040 m</span>
+                        <label class="fixed-param-label" for="coverDepth">Cover Depth</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="coverDepth" value="0.040" step="0.001" min="0">
+                            <span class="fixed-param-suffix">m</span>
+                        </div>
                     </div>
                     <div class="fixed-param">
-                        <span class="fixed-param-label">Bedding Depth</span>
-                        <span class="fixed-param-value">0.030 m</span>
+                        <label class="fixed-param-label" for="beddingDepth">Bedding Depth</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="beddingDepth" value="0.030" step="0.001" min="0">
+                            <span class="fixed-param-suffix">m</span>
+                        </div>
                     </div>
                     <div class="fixed-param">
-                        <span class="fixed-param-label">Stackabox Unit Height</span>
-                        <span class="fixed-param-value">0.150 m</span>
+                        <label class="fixed-param-label" for="stackaboxHeight">Stackabox Unit Height</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="stackaboxHeight" value="0.150" step="0.001" min="0.001">
+                            <span class="fixed-param-suffix">m</span>
+                        </div>
                     </div>
                     <div class="fixed-param">
-                        <span class="fixed-param-label">Invert Below Duct</span>
-                        <span class="fixed-param-value">0.450 m</span>
+                        <label class="fixed-param-label" for="sumpDepth">Sump Depth</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="sumpDepth" value="0.150" step="0.001" min="0.001">
+                            <span class="fixed-param-suffix">m</span>
+                        </div>
                     </div>
+                    <div class="fixed-param">
+                        <label class="fixed-param-label" for="invertOffset">Invert Below Duct</label>
+                        <div class="fixed-param-input">
+                            <input type="number" id="invertOffset" value="0.450" step="0.001" min="0">
+                            <span class="fixed-param-suffix">m</span>
+                        </div>
+                    </div>
+                    <div class="fixed-param-note">These values update the drawing and dip sheet immediately.</div>
+                    <div class="error" id="parameterError"></div>
                 </div>
             </div>
             
@@ -653,7 +762,7 @@
                     <div class="result-card warning">
                         <div class="result-label">Stackabox Units (Whole)</div>
                         <div class="result-value" id="numUnits">-</div>
-                        <div class="result-unit">units @ 0.150m each</div>
+                        <div class="result-unit" id="numUnitsUnit">units @ 0.150m each</div>
                     </div>
                     <div class="result-card">
                         <div class="result-label">Actual Depth Built</div>
@@ -664,6 +773,11 @@
                         <div class="result-label">Dig Depth</div>
                         <div class="result-value" id="digDepth">-</div>
                         <div class="result-unit" id="digDepthUnit">m</div>
+                    </div>
+                    <div class="result-card" id="invertClearanceCard">
+                        <div class="result-label">Invert to Sump Bottom</div>
+                        <div class="result-value" id="invertClearance">-</div>
+                        <div class="result-unit" id="invertClearanceUnit">m</div>
                     </div>
                 </div>
                 
@@ -703,13 +817,6 @@
     </div>
     
     <script>
-        const FINISHED_LEVEL = 6.100;
-        const COVER_DEPTH = 0.040;
-        const BEDDING_DEPTH = 0.030;
-        const STACKABOX_HEIGHT = 0.150;
-        const SUMP_DEPTH = 0.150;
-        const INVERT_OFFSET = 0.450;
-        
         // Cross-section display scale constants
         const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
         const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
@@ -727,24 +834,59 @@
         const ductLevelInput = document.getElementById('ductLevel');
         const laserDatumInput = document.getElementById('laserDatum');
         const currentGroundLevelInput = document.getElementById('currentGroundLevel');
+        const parameterInputs = {
+            finishedLevel: document.getElementById('finishedLevel'),
+            coverDepth: document.getElementById('coverDepth'),
+            beddingDepth: document.getElementById('beddingDepth'),
+            stackaboxHeight: document.getElementById('stackaboxHeight'),
+            sumpDepth: document.getElementById('sumpDepth'),
+            invertOffset: document.getElementById('invertOffset')
+        };
         const pitDrawing = document.getElementById('pitDrawing');
         const dipTableBody = document.getElementById('dipTableBody');
-        
+
+        function getParameters() {
+            return Object.fromEntries(
+                Object.entries(parameterInputs).map(([key, input]) => [key, parseFloat(input.value)])
+            );
+        }
+
         function calculate() {
             const ductLevel = parseFloat(ductLevelInput.value);
             const laserDatum = parseFloat(laserDatumInput.value);
+            const {
+                finishedLevel,
+                coverDepth,
+                beddingDepth,
+                stackaboxHeight,
+                sumpDepth,
+                invertOffset
+            } = getParameters();
             
             // Validation
             const ductError = document.getElementById('ductError');
             const laserError = document.getElementById('laserError');
+            const parameterError = document.getElementById('parameterError');
+
+            if (![finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset].every(Number.isFinite)) {
+                parameterError.textContent = 'Please enter valid fixed parameter values';
+                parameterError.classList.add('show');
+                return;
+            }
+            if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
+                parameterError.textContent = 'Fixed parameters must be positive values';
+                parameterError.classList.add('show');
+                return;
+            }
+            parameterError.classList.remove('show');
             
             if (isNaN(ductLevel)) {
                 ductError.textContent = 'Please enter a valid number';
                 ductError.classList.add('show');
                 return;
             }
-            if (ductLevel >= FINISHED_LEVEL) {
-                ductError.textContent = 'Duct level must be below finished level (6.100 m AOD)';
+            if (ductLevel >= finishedLevel) {
+                ductError.textContent = `Duct level must be below finished level (${finishedLevel.toFixed(3)} m AOD)`;
                 ductError.classList.add('show');
                 return;
             }
@@ -755,7 +897,7 @@
                 laserError.classList.add('show');
                 return;
             }
-            if (laserDatum <= FINISHED_LEVEL) {
+            if (laserDatum <= finishedLevel) {
                 laserError.textContent = 'Laser datum should typically be above finished level';
                 laserError.classList.add('show');
                 return;
@@ -774,37 +916,44 @@
             
             // Calculations
             // beddingLevel = top of first stackabox = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH
-            const coverLevel = FINISHED_LEVEL - COVER_DEPTH;
-            const beddingLevel = FINISHED_LEVEL - COVER_DEPTH - BEDDING_DEPTH;
+            const coverLevel = finishedLevel - coverDepth;
+            const beddingLevel = finishedLevel - coverDepth - beddingDepth;
             const requiredDepth = beddingLevel - ductLevel;
-            const unitsAboveDuct = Math.floor(requiredDepth / STACKABOX_HEIGHT);
-            // Ensure at least 1 full stackabox unit sits below the duct
-            const numUnits = Math.max(Math.ceil(requiredDepth / STACKABOX_HEIGHT), unitsAboveDuct + 2);
-            const actualDepth = numUnits * STACKABOX_HEIGHT;
-            const invertLevel = ductLevel - INVERT_OFFSET;
+            const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
+            const invertLevel = ductLevel - invertOffset;
+            const minUnitsForInvertClearance = Math.ceil(Math.max(0, beddingLevel - invertLevel - sumpDepth) / stackaboxHeight);
+            // Ensure at least 1 full stackabox unit sits below the duct and the sump reaches the invert.
+            const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForInvertClearance);
+            const actualDepth = numUnits * stackaboxHeight;
             const sumpTopLevel = beddingLevel - actualDepth;
-            const sumpBottomLevel = sumpTopLevel - SUMP_DEPTH;
-            const digDepth = currentGroundLevel - FINISHED_LEVEL;
+            const sumpBottomLevel = sumpTopLevel - sumpDepth;
+            const digDepth = currentGroundLevel - finishedLevel;
+            const invertClearance = invertLevel - sumpBottomLevel;
             
             // Update result cards
             document.getElementById('requiredDepth').textContent = requiredDepth.toFixed(3);
             document.getElementById('numUnits').textContent = numUnits;
             document.getElementById('actualDepth').textContent = actualDepth.toFixed(3);
+            document.getElementById('numUnitsUnit').textContent = `units @ ${stackaboxHeight.toFixed(3)}m each`;
             const digDepthCard = document.getElementById('digDepthCard');
             document.getElementById('digDepth').textContent = Math.abs(digDepth).toFixed(3);
             document.getElementById('digDepthUnit').textContent = digDepth >= 0 ? 'm to excavate' : 'm fill required';
             digDepthCard.className = digDepth >= 0 ? 'result-card' : 'result-card warning';
+            const invertClearanceCard = document.getElementById('invertClearanceCard');
+            document.getElementById('invertClearance').textContent = Math.abs(invertClearance).toFixed(3);
+            document.getElementById('invertClearanceUnit').textContent = invertClearance >= 0 ? 'm sump below invert' : 'm invert below sump';
+            invertClearanceCard.className = invertClearance >= 0 ? 'result-card' : 'result-card warning';
             
             // Build levels array
             const levels = [
-                { name: 'Finished Compound Level', level: FINISHED_LEVEL, type: 'finished' },
+                { name: 'Finished Compound Level', level: finishedLevel, type: 'finished' },
                 { name: 'Cover (B125) Underside', level: coverLevel, type: 'cover' },
                 { name: 'Bedding Level (Top of Stackaboxes)', level: beddingLevel, type: 'bedding' },
                 { name: 'Lowest Duct Level', level: ductLevel, type: 'duct' }
             ];
             
             for (let i = 1; i <= numUnits; i++) {
-                const stackBoxLevelTop = beddingLevel - (i - 1) * STACKABOX_HEIGHT;
+                const stackBoxLevelTop = beddingLevel - (i - 1) * stackaboxHeight;
                 levels.push({
                     name: `Stackabox Unit ${i}`,
                     level: stackBoxLevelTop,
@@ -813,7 +962,7 @@
             }
             
             levels.push(
-                { name: 'Sump Unit Top (300×300×150)', level: sumpTopLevel, type: 'sump' },
+                { name: `Sump Unit Top (300×300×${Math.round(sumpDepth * 1000)})`, level: sumpTopLevel, type: 'sump' },
                 { name: 'Sump Unit Bottom', level: sumpBottomLevel, type: 'sump-bottom' },
                 { name: 'Drain/Invert Level (100×100)', level: invertLevel, type: 'drain' }
             );
@@ -825,26 +974,59 @@
                     <tr>
                         <td class="component">${lv.name}</td>
                         <td class="level">${lv.level.toFixed(3)}</td>
-                        <td>${(FINISHED_LEVEL - lv.level).toFixed(3)}</td>
+                        <td>${(finishedLevel - lv.level).toFixed(3)}</td>
                         <td class="offset">${offsetFromLaser >= 0 ? '−' : '+'} ${Math.abs(offsetFromLaser).toFixed(3)}</td>
                     </tr>
                 `;
             }).join('');
             
             // Draw cross-section
-            drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel);
+            drawCrossSection({
+                levels,
+                ductLevel,
+                invertLevel,
+                laserDatum,
+                numUnits,
+                beddingLevel,
+                coverLevel,
+                sumpTopLevel,
+                sumpBottomLevel,
+                currentGroundLevel,
+                finishedLevel,
+                coverDepth,
+                beddingDepth,
+                stackaboxHeight,
+                sumpDepth,
+                invertClearance
+            });
         }
         
-        function drawCrossSection(levels, ductLevel, invertLevel, laserDatum, numUnits, beddingLevel, coverLevel, sumpTopLevel, sumpBottomLevel, currentGroundLevel) {
+        function drawCrossSection({
+            ductLevel,
+            invertLevel,
+            laserDatum,
+            numUnits,
+            beddingLevel,
+            coverLevel,
+            sumpTopLevel,
+            sumpBottomLevel,
+            currentGroundLevel,
+            finishedLevel,
+            coverDepth,
+            beddingDepth,
+            stackaboxHeight,
+            sumpDepth,
+            invertClearance
+        }) {
             pitDrawing.innerHTML = '';
 
-            const effectiveCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : FINISHED_LEVEL;
+            const effectiveCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : finishedLevel;
             const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
             const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
             const concreteTopLevel = drainBottomLevel;
             const concreteBottomLevel = concreteTopLevel - CONCRETE_BASE_DEPTH;
 
-            const highestLevel = Math.max(FINISHED_LEVEL, laserDatum, effectiveCurrentGroundLevel);
+            const highestLevel = Math.max(finishedLevel, laserDatum, effectiveCurrentGroundLevel);
             const lowestLevel = Math.min(concreteBottomLevel, sumpBottomLevel, invertLevel);
             const drawingTopLevel = highestLevel + CROSS_SECTION_TOP_PADDING_M;
             const drawingBottomLevel = lowestLevel - CROSS_SECTION_BOTTOM_PADDING_M;
@@ -874,6 +1056,19 @@
                     ${extraHtml}
                 `;
                 pitDrawing.appendChild(markerEl);
+            };
+
+            const addDimensionAnnotation = (startLevel, endLevel, label, color) => {
+                const topLevel = Math.max(startLevel, endLevel);
+                const bottomLevel = Math.min(startLevel, endLevel);
+                const annotationEl = document.createElement('div');
+                annotationEl.className = 'dimension-annotation';
+                annotationEl.style.color = color;
+                annotationEl.style.right = '170px';
+                annotationEl.style.top = `${levelToTopPx(topLevel)}px`;
+                annotationEl.style.height = `${Math.max(16, levelToTopPx(bottomLevel) - levelToTopPx(topLevel))}px`;
+                annotationEl.innerHTML = `<div class="dimension-label">${label}</div>`;
+                pitDrawing.appendChild(annotationEl);
             };
 
             const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerFn = null, minHeightPx = MIN_COMPONENT_HEIGHT_PX) => {
@@ -914,16 +1109,15 @@
             };
 
             addComponent(
-                FINISHED_LEVEL,
+                finishedLevel,
                 coverLevel,
                 'cover',
                 `
                     <div style="text-align: center;">
                         <div>B125 Cover</div>
-                        <div style="font-size: 10px;">(0.040m)</div>
+                        <div style="font-size: 10px;">(${coverDepth.toFixed(3)}m)</div>
                     </div>
                 `,
-                topPx => addLevelMarker(topPx, coverLevel, COVER_MARKER_HEX_COLOR),
                 MIN_COVER_COMPONENT_HEIGHT_PX
             );
 
@@ -934,23 +1128,22 @@
                 `
                     <div style="text-align: center;">
                         <div>Bedding</div>
-                        <div style="font-size: 10px;">(0.030m)</div>
+                        <div style="font-size: 10px;">(${beddingDepth.toFixed(3)}m)</div>
                     </div>
-                `,
-                topPx => addLevelMarker(topPx, beddingLevel, BEDDING_MARKER_HEX_COLOR)
+                `
             );
 
-            const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / STACKABOX_HEIGHT);
+            const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / stackaboxHeight);
             const ductUnitIndex = unitsAboveDuct;
 
             for (let i = 0; i < unitsAboveDuct; i++) {
-                const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
-                const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, topPx => addLevelMarker(topPx, unitTopLevel));
+                const unitTopLevel = beddingLevel - i * stackaboxHeight;
+                const unitBottomLevel = unitTopLevel - stackaboxHeight;
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`);
             }
 
-            const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
-            const ductUnitBottomLevel = ductUnitTopLevel - STACKABOX_HEIGHT;
+            const ductUnitTopLevel = beddingLevel - ductUnitIndex * stackaboxHeight;
+            const ductUnitBottomLevel = ductUnitTopLevel - stackaboxHeight;
             addComponent(
                 ductUnitTopLevel,
                 ductUnitBottomLevel,
@@ -961,29 +1154,33 @@
                         <div class="duct-core">Duct Ø</div>
                         <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
-                `,
-                topPx => addLevelMarker(topPx, ductUnitTopLevel, '#667eea', `
-                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
-                    <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)} m AOD</div>
-                    <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${((laserDatum - ductLevel) >= 0 ? '+' : '') + (laserDatum - ductLevel).toFixed(3)}</div>
-                `)
+                `
             );
 
             for (let i = ductUnitIndex + 1; i < numUnits; i++) {
-                const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
-                const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, topPx => addLevelMarker(topPx, unitTopLevel));
+                const unitTopLevel = beddingLevel - i * stackaboxHeight;
+                const unitBottomLevel = unitTopLevel - stackaboxHeight;
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`);
             }
 
-            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', topPx => addLevelMarker(topPx, sumpTopLevel));
-            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', topPx => addLevelMarker(topPx, invertLevel));
+            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', `Sump 300×300×${Math.round(sumpDepth * 1000)}`);
+            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain');
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
             addLevelLine('CURRENT GROUND', effectiveCurrentGroundLevel, '#228B22', true);
-            addLevelLine('FINISHED', FINISHED_LEVEL, '#333');
+            addLevelLine('FINISHED', finishedLevel, '#333');
+            addLevelLine('COVER UNDERSIDE', coverLevel, COVER_MARKER_HEX_COLOR, true);
             addLevelLine('BEDDING LEVEL', beddingLevel, '#999', true);
+            addLevelLine('DUCT CENTRE', ductLevel, '#0066CC', true);
+            addLevelLine('INVERT', invertLevel, '#004499', true);
             addLevelLine('SUMP BOTTOM', sumpBottomLevel, '#764BA2', true);
             addLevelLine('LASER DATUM', laserDatum, '#FF6B6B', false, false);
+            addDimensionAnnotation(
+                invertLevel,
+                sumpBottomLevel,
+                invertClearance >= 0 ? `${invertClearance.toFixed(3)} m clearance` : `${Math.abs(invertClearance).toFixed(3)} m clash`,
+                invertClearance >= 0 ? '#1f7a4d' : '#c0392b'
+            );
         }
         
         function generatePDF() {
@@ -1023,6 +1220,10 @@
         laserDatumInput.addEventListener('change', calculate);
         currentGroundLevelInput.addEventListener('input', calculate);
         currentGroundLevelInput.addEventListener('change', calculate);
+        Object.values(parameterInputs).forEach(input => {
+            input.addEventListener('input', calculate);
+            input.addEventListener('change', calculate);
+        });
         
         // Initial calculation
         calculate();
