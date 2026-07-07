@@ -719,8 +719,8 @@
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
         const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // keep the thin 40mm cover readable in the cross-section
-        const COVER_MARKER_COLOR = '#CC5555';
-        const BEDDING_MARKER_COLOR = '#CC8400';
+        const COVER_MARKER_HEX_COLOR = '#CC5555';
+        const BEDDING_MARKER_HEX_COLOR = '#CC8400';
         
         const drawPitNumberInput = document.getElementById('drawPitNumber');
         const ductLevelInput = document.getElementById('ductLevel');
@@ -869,7 +869,7 @@
                 // Accept the legacy string marker argument as well as the new options object.
                 const options = typeof componentOptions === 'string'
                     ? { markerHtml: componentOptions }
-                    : componentOptions;
+                    : (componentOptions && typeof componentOptions === 'object' ? componentOptions : {});
                 const {
                     markerHtml = '',
                     minHeightPx = MIN_COMPONENT_HEIGHT_PX
@@ -919,7 +919,7 @@
                     </div>
                 `,
                 {
-                    markerHtml: createLevelMarkerHtml(coverLevel, COVER_MARKER_COLOR),
+                    markerHtml: createLevelMarkerHtml(coverLevel, COVER_MARKER_HEX_COLOR),
                     minHeightPx: MIN_COVER_COMPONENT_HEIGHT_PX
                 }
             );
@@ -935,7 +935,7 @@
                     </div>
                 `,
                 {
-                    markerHtml: createLevelMarkerHtml(beddingLevel, BEDDING_MARKER_COLOR)
+                    markerHtml: createLevelMarkerHtml(beddingLevel, BEDDING_MARKER_HEX_COLOR)
                 }
             );
 
