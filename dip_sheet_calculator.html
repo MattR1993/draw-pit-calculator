@@ -695,7 +695,7 @@
                     <div class="fixed-param">
                         <label class="fixed-param-label" for="finishedLevel">Finished Compound Level</label>
                         <div class="fixed-param-input">
-                            <input type="number" id="finishedLevel" value="6.100" step="0.001">
+                            <input type="number" id="finishedLevel" value="6.100" step="0.001" min="0">
                             <span class="fixed-param-suffix">m AOD</span>
                         </div>
                     </div>
@@ -868,13 +868,13 @@
             const laserError = document.getElementById('laserError');
             const parameterError = document.getElementById('parameterError');
 
-            if (![finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset].every(Number.isFinite)) {
+            if (!Object.values({ finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset }).every(Number.isFinite)) {
                 parameterError.textContent = 'Please enter valid fixed parameter values';
                 parameterError.classList.add('show');
                 return;
             }
             if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
-                parameterError.textContent = 'Fixed parameters must be positive values';
+                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be greater than zero; cover, bedding, and invert offset cannot be negative';
                 parameterError.classList.add('show');
                 return;
             }
