@@ -775,7 +775,7 @@
                         <div class="result-unit" id="digDepthUnit">m</div>
                     </div>
                     <div class="result-card" id="invertClearanceCard">
-                        <div class="result-label">Invert to Sump Bottom</div>
+                        <div class="result-label">Invert to Sump Top</div>
                         <div class="result-value" id="invertClearance">-</div>
                         <div class="result-unit" id="invertClearanceUnit">m</div>
                     </div>
@@ -821,6 +821,7 @@
         const CROSS_SECTION_SCALE_PX_PER_M = 200; // pixels per metre
         const DRAIN_BODY_DEPTH = 0.100; // metres (100x100 drain body)
         const CONCRETE_BASE_DEPTH = 0.300; // metres visual concrete thickness
+        const SUMP_TOP_OFFSET_M = 0.250;
         const CROSS_SECTION_TOP_PADDING_M = 0.120;
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
@@ -855,13 +856,13 @@
         function getInvertClearanceStatus(invertClearance) {
             return invertClearance >= 0
                 ? {
-                    unitText: 'm sump below invert',
-                    annotationText: `${invertClearance.toFixed(3)} m clearance`,
+                    unitText: 'm sump above invert',
+                    annotationText: `${invertClearance.toFixed(3)} m above invert`,
                     color: '#1f7a4d'
                 }
                 : {
-                    unitText: 'm sump above invert',
-                    annotationText: `${Math.abs(invertClearance).toFixed(3)} m clash`,
+                    unitText: 'm sump below invert',
+                    annotationText: `${Math.abs(invertClearance).toFixed(3)} m below invert`,
                     color: '#c0392b'
                 };
         }
@@ -937,15 +938,14 @@
             const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
             const invertLevel = ductLevel - invertOffset;
-            const minDepthToReachInvert = Math.max(0, beddingLevel - (invertLevel + sumpDepth));
-            const minUnitsForInvertClearance = Math.ceil(minDepthToReachInvert / stackaboxHeight);
-            // Ensure at least 1 full stackabox unit sits below the duct and the sump reaches the invert.
-            const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForInvertClearance);
+            const sumpTopLevel = invertLevel + SUMP_TOP_OFFSET_M;
+            const minDepthToReachSumpTop = Math.max(0, beddingLevel - sumpTopLevel);
+            const minUnitsForSumpTop = Math.ceil(minDepthToReachSumpTop / stackaboxHeight);
+            // Ensure at least 1 full stackabox unit sits below the duct and the sump can be shown beneath the stackabox stack.
+            const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForSumpTop);
             const actualDepth = numUnits * stackaboxHeight;
-            const sumpTopLevel = beddingLevel - actualDepth;
-            const sumpBottomLevel = sumpTopLevel - sumpDepth;
             const digDepth = currentGroundLevel - finishedLevel;
-            const invertClearance = invertLevel - sumpBottomLevel;
+            const invertClearance = sumpTopLevel - invertLevel;
             const invertClearanceStatus = getInvertClearanceStatus(invertClearance);
             
             // Update result cards
@@ -981,7 +981,6 @@
             
             levels.push(
                 { name: `Sump Unit Top (300×300×${Math.round(sumpDepth * 1000)})`, level: sumpTopLevel, type: 'sump' },
-                { name: 'Sump Unit Bottom', level: sumpBottomLevel, type: 'sump-bottom' },
                 { name: 'Drain/Invert Level (100×100)', level: invertLevel, type: 'drain' }
             );
             
@@ -1008,7 +1007,6 @@
                 beddingLevel,
                 coverLevel,
                 sumpTopLevel,
-                sumpBottomLevel,
                 currentGroundLevel,
                 finishedLevel,
                 coverDepth,
@@ -1028,7 +1026,6 @@
             beddingLevel,
             coverLevel,
             sumpTopLevel,
-            sumpBottomLevel,
             currentGroundLevel,
             finishedLevel,
             coverDepth,
@@ -1041,13 +1038,14 @@
             pitDrawing.innerHTML = '';
 
             const effectiveCurrentGroundLevel = Number.isFinite(currentGroundLevel) ? currentGroundLevel : finishedLevel;
+            const sumpComponentBottomLevel = sumpTopLevel - sumpDepth;
             const drainTopLevel = invertLevel + (DRAIN_BODY_DEPTH / 2);
             const drainBottomLevel = invertLevel - (DRAIN_BODY_DEPTH / 2);
             const concreteTopLevel = drainBottomLevel;
             const concreteBottomLevel = concreteTopLevel - CONCRETE_BASE_DEPTH;
 
             const highestLevel = Math.max(finishedLevel, laserDatum, effectiveCurrentGroundLevel);
-            const lowestLevel = Math.min(concreteBottomLevel, sumpBottomLevel, invertLevel);
+            const lowestLevel = Math.min(concreteBottomLevel, invertLevel);
             const drawingTopLevel = highestLevel + CROSS_SECTION_TOP_PADDING_M;
             const drawingBottomLevel = lowestLevel - CROSS_SECTION_BOTTOM_PADDING_M;
             const totalHeightPx = Math.max(MIN_CROSS_SECTION_HEIGHT_PX, (drawingTopLevel - drawingBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
@@ -1183,7 +1181,7 @@
                 addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`);
             }
 
-            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', `Sump 300×300×${Math.round(sumpDepth * 1000)}`);
+            addComponent(sumpTopLevel, sumpComponentBottomLevel, 'sump', `Sump 300×300×${Math.round(sumpDepth * 1000)}`);
             addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain');
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
@@ -1193,11 +1191,10 @@
             addLevelLine('BEDDING LEVEL', beddingLevel, '#999', true);
             addLevelLine('DUCT CENTRE', ductLevel, '#0066CC', true);
             addLevelLine('INVERT', invertLevel, '#004499', true);
-            addLevelLine('SUMP BOTTOM', sumpBottomLevel, '#764BA2', true);
             addLevelLine('LASER DATUM', laserDatum, '#FF6B6B', false, false);
             addDimensionAnnotation(
                 invertLevel,
-                sumpBottomLevel,
+                sumpTopLevel,
                 invertClearanceStatus.annotationText,
                 invertClearanceStatus.color
             );
