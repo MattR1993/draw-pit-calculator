@@ -826,6 +826,7 @@
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
         const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // minimum visual height needed to keep the thin 40mm cover row legible
+        const MIN_DIMENSION_ANNOTATION_HEIGHT_PX = 16;
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
         const LEVEL_MARKER_VERTICAL_OFFSET_PX = 10; // px above the component/line top to centre the marker label
@@ -854,6 +855,7 @@
         function calculate() {
             const ductLevel = parseFloat(ductLevelInput.value);
             const laserDatum = parseFloat(laserDatumInput.value);
+            const params = getParameters();
             const {
                 finishedLevel,
                 coverDepth,
@@ -861,20 +863,20 @@
                 stackaboxHeight,
                 sumpDepth,
                 invertOffset
-            } = getParameters();
+            } = params;
             
             // Validation
             const ductError = document.getElementById('ductError');
             const laserError = document.getElementById('laserError');
             const parameterError = document.getElementById('parameterError');
 
-            if (![finishedLevel, coverDepth, beddingDepth, stackaboxHeight, sumpDepth, invertOffset].every(Number.isFinite)) {
+            if (!Object.values(params).every(Number.isFinite)) {
                 parameterError.textContent = 'Please enter valid fixed parameter values';
                 parameterError.classList.add('show');
                 return;
             }
             if (finishedLevel <= 0 || coverDepth < 0 || beddingDepth < 0 || stackaboxHeight <= 0 || sumpDepth <= 0 || invertOffset < 0) {
-                parameterError.textContent = 'Finished level, stackabox height, and sump depth must be greater than zero; cover, bedding, and invert offset must be zero or greater';
+                parameterError.textContent = 'Invalid parameters: finished level, stackabox height, and sump depth must be greater than zero. Cover, bedding, and invert offset must be zero or greater.';
                 parameterError.classList.add('show');
                 return;
             }
@@ -921,7 +923,7 @@
             const requiredDepth = beddingLevel - ductLevel;
             const unitsAboveDuct = Math.floor(requiredDepth / stackaboxHeight);
             const invertLevel = ductLevel - invertOffset;
-            const minUnitsForInvertClearance = Math.ceil(Math.max(0, beddingLevel - invertLevel - sumpDepth) / stackaboxHeight);
+            const minUnitsForInvertClearance = Math.ceil(Math.max(0, beddingLevel - (invertLevel + sumpDepth)) / stackaboxHeight);
             // Ensure at least 1 full stackabox unit sits below the duct and the sump reaches the invert.
             const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForInvertClearance);
             const actualDepth = numUnits * stackaboxHeight;
@@ -1066,7 +1068,7 @@
                 annotationEl.style.color = color;
                 annotationEl.style.right = '170px';
                 annotationEl.style.top = `${levelToTopPx(topLevel)}px`;
-                annotationEl.style.height = `${Math.max(16, levelToTopPx(bottomLevel) - levelToTopPx(topLevel))}px`;
+                annotationEl.style.height = `${Math.max(MIN_DIMENSION_ANNOTATION_HEIGHT_PX, levelToTopPx(bottomLevel) - levelToTopPx(topLevel))}px`;
                 annotationEl.innerHTML = `<div class="dimension-label">${label}</div>`;
                 pitDrawing.appendChild(annotationEl);
             };
