@@ -245,11 +245,15 @@
 
         .level-line-label {
             position: absolute;
-            top: -15px;
+            top: -22px;
             left: 5px;
             font-size: 11px;
             font-weight: 700;
             white-space: nowrap;
+            padding: 2px 6px;
+            background: rgba(250, 250, 250, 0.94);
+            border-radius: 4px;
+            z-index: 6;
         }
         
         .component-row {
@@ -856,10 +860,14 @@
                 `;
             };
 
-            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerHtml = '') => {
+            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, options = {}) => {
+                const {
+                    markerHtml = '',
+                    minHeightPx = MIN_COMPONENT_HEIGHT_PX
+                } = options;
                 const componentTopLevel = Math.max(topLevel, bottomLevel);
                 const componentBottomLevel = Math.min(topLevel, bottomLevel);
-                const heightPx = Math.max(MIN_COMPONENT_HEIGHT_PX, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
+                const heightPx = Math.max(minHeightPx, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
                 const row = document.createElement('div');
                 row.className = 'component-row';
                 row.style.top = `${levelToTopPx(componentTopLevel)}px`;
@@ -900,7 +908,11 @@
                         <div>B125 Cover</div>
                         <div style="font-size: 10px;">(0.040m)</div>
                     </div>
-                `
+                `,
+                {
+                    markerHtml: createLevelMarkerHtml(coverLevel, '#CC5555'),
+                    minHeightPx: 32
+                }
             );
 
             addComponent(
@@ -913,7 +925,9 @@
                         <div style="font-size: 10px;">(0.030m)</div>
                     </div>
                 `,
-                createLevelMarkerHtml(coverLevel)
+                {
+                    markerHtml: createLevelMarkerHtml(beddingLevel, '#CC8400')
+                }
             );
 
             const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / STACKABOX_HEIGHT);
@@ -922,7 +936,9 @@
             for (let i = 0; i < unitsAboveDuct; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
                 const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, {
+                    markerHtml: createLevelMarkerHtml(unitTopLevel)
+                });
             }
 
             const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
@@ -938,25 +954,33 @@
                         <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
                 `,
-                createLevelMarkerHtml(
-                    ductUnitTopLevel,
-                    '#667eea',
-                    `
-                        <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
-                        <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
-                        <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
-                    `
-                )
+                {
+                    markerHtml: createLevelMarkerHtml(
+                        ductUnitTopLevel,
+                        '#667eea',
+                        `
+                            <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
+                            <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
+                            <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
+                        `
+                    )
+                }
             );
 
             for (let i = ductUnitIndex + 1; i < numUnits; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
                 const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, {
+                    markerHtml: createLevelMarkerHtml(unitTopLevel)
+                });
             }
 
-            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', createLevelMarkerHtml(sumpTopLevel));
-            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', createLevelMarkerHtml(invertLevel));
+            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', {
+                markerHtml: createLevelMarkerHtml(sumpTopLevel)
+            });
+            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', {
+                markerHtml: createLevelMarkerHtml(invertLevel)
+            });
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
             addLevelLine('CURRENT GROUND', effectiveCurrentGroundLevel, '#228B22', true);
