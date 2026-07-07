@@ -718,7 +718,7 @@
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
-        const MIN_COVER_COMPONENT_HEIGHT_PX = 32;
+        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // keep the thin 40mm cover readable in the cross-section
         const COVER_MARKER_COLOR = '#CC5555';
         const BEDDING_MARKER_COLOR = '#CC8400';
         
@@ -866,6 +866,7 @@
             };
 
             const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, componentOptions = {}) => {
+                // Accept the legacy string marker argument as well as the new options object.
                 const options = typeof componentOptions === 'string'
                     ? { markerHtml: componentOptions }
                     : componentOptions;
