@@ -227,7 +227,7 @@
         
         /* Cross-section styling */
         .pit-drawing {
-            --level-label-offset: -22px;
+            --level-label-offset: -22px; /* lifts line labels clear of the 32px cover row while keeping them inside the drawing padding */
             --level-label-z-index: 6;
             position: relative;
             min-height: 600px;
@@ -718,7 +718,7 @@
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
-        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // keeps the cover title and depth label legible on the thin 40mm cover row
+        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // ~11px title + ~10px depth label + padding keeps the thin 40mm cover row legible
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
         
