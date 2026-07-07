@@ -944,7 +944,7 @@
             // Ensure at least 1 full stackabox unit sits below the duct and the sump can be shown beneath the stackabox stack.
             const numUnits = Math.max(Math.ceil(requiredDepth / stackaboxHeight), unitsAboveDuct + 2, minUnitsForSumpTop);
             const actualDepth = numUnits * stackaboxHeight;
-            const digDepth = currentGroundLevel - finishedLevel;
+            const digDepth = currentGroundLevel - invertLevel;
             const invertClearance = sumpTopLevel - invertLevel;
             const invertClearanceStatus = getInvertClearanceStatus(invertClearance);
             
