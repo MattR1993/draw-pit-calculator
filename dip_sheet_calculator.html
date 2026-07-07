@@ -718,7 +718,7 @@
         const CROSS_SECTION_BOTTOM_PADDING_M = 0.120;
         const MIN_CROSS_SECTION_HEIGHT_PX = 600;
         const MIN_COMPONENT_HEIGHT_PX = 1;
-        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // two short text lines need ~32px to remain legible on the 40mm cover row
+        const MIN_COVER_COMPONENT_HEIGHT_PX = 32; // keeps the cover title and depth label legible on the thin 40mm cover row
         const COVER_MARKER_HEX_COLOR = '#CC5555';
         const BEDDING_MARKER_HEX_COLOR = '#CC8400';
         
@@ -865,11 +865,10 @@
                 `;
             };
 
-            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, componentOptions = {}) => {
-                const {
-                    markerHtml = '',
-                    minHeightPx = MIN_COMPONENT_HEIGHT_PX
-                } = componentOptions;
+            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, {
+                markerHtml = '',
+                minHeightPx = MIN_COMPONENT_HEIGHT_PX
+            } = {}) => {
                 const componentTopLevel = Math.max(topLevel, bottomLevel);
                 const componentBottomLevel = Math.min(topLevel, bottomLevel);
                 const heightPx = Math.max(minHeightPx, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
