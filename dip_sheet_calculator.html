@@ -270,8 +270,7 @@
         
         .level-marker {
             position: absolute;
-            right: -95px;
-            top: -10px;
+            right: 5px;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -280,6 +279,7 @@
             font-weight: 600;
             color: #667eea;
             white-space: nowrap;
+            z-index: 6;
         }
         
         .level-line {
@@ -854,18 +854,28 @@
             // Convert an elevation value (m AOD) into vertical pixels from the top of the drawing area.
             const levelToTopPx = (level) => (drawingTopLevel - level) * CROSS_SECTION_SCALE_PX_PER_M;
 
-            const createLevelMarkerHtml = (level, color = '#667eea', extraHtml = '') => {
-                return `
-                    <div class="level-marker" style="color: ${color};">
-                        <div class="level-line" style="background: ${color};"></div>
-                        <div>${level.toFixed(3)}</div>
-                        <div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>
-                        ${extraHtml}
-                    </div>
+            // addLevelMarker: appends a marker element DIRECTLY to pitDrawing so it is
+            // positioned relative to pit-drawing (right: 5px sits within the 100px right
+            // padding area) rather than inside component-row / level-line-row containers
+            // whose right: 0 boundary would push a negative-right child outside the
+            // overflow: hidden clip edge.
+            const addLevelMarker = (topPx, level, color = '#667eea', extraHtml = '') => {
+                const delta = laserDatum - level;
+                const deltaStr = (delta >= 0 ? '+' : '') + delta.toFixed(3);
+                const markerEl = document.createElement('div');
+                markerEl.className = 'level-marker';
+                markerEl.style.color = color;
+                markerEl.style.top = `${topPx - 10}px`;
+                markerEl.innerHTML = `
+                    <div class="level-line" style="background: ${color};"></div>
+                    <div>${level.toFixed(3)} m AOD</div>
+                    <div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${deltaStr}</div>
+                    ${extraHtml}
                 `;
+                pitDrawing.appendChild(markerEl);
             };
 
-            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerHtml = '', minHeightPx = MIN_COMPONENT_HEIGHT_PX) => {
+            const addComponent = (topLevel, bottomLevel, componentClass, contentHtml, markerFn = null, minHeightPx = MIN_COMPONENT_HEIGHT_PX) => {
                 const componentTopLevel = Math.max(topLevel, bottomLevel);
                 const componentBottomLevel = Math.min(topLevel, bottomLevel);
                 const heightPx = Math.max(minHeightPx, (componentTopLevel - componentBottomLevel) * CROSS_SECTION_SCALE_PX_PER_M);
@@ -873,11 +883,9 @@
                 row.className = 'component-row';
                 row.style.top = `${levelToTopPx(componentTopLevel)}px`;
                 row.style.height = `${heightPx}px`;
-                row.innerHTML = `
-                    <div class="component ${componentClass}">${contentHtml}</div>
-                    ${markerHtml}
-                `;
+                row.innerHTML = `<div class="component ${componentClass}">${contentHtml}</div>`;
                 pitDrawing.appendChild(row);
+                if (markerFn) markerFn(levelToTopPx(componentTopLevel));
             };
 
             const addLevelLine = (label, level, color, dashed = false, showDelta = true) => {
@@ -886,18 +894,22 @@
                 lineRow.style.top = `${levelToTopPx(level)}px`;
                 lineRow.style.borderTopColor = color;
                 lineRow.style.borderTopStyle = dashed ? 'dashed' : 'solid';
-                const markerDeltaHtml = showDelta
-                    ? `<div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(laserDatum - level).toFixed(3)}</div>`
-                    : `<div class="delta-value" style="color: ${color}; border-color: ${color};">LASER</div>`;
-                lineRow.innerHTML = `
-                    <div class="level-line-label" style="color: ${color};">${label}: ${level.toFixed(3)} m AOD</div>
-                    <div class="level-marker" style="color: ${color};">
-                        <div class="level-line" style="background: ${color};"></div>
-                        <div>${level.toFixed(3)}</div>
-                        ${markerDeltaHtml}
-                    </div>
-                `;
+                lineRow.innerHTML = `<div class="level-line-label" style="color: ${color};">${label}: ${level.toFixed(3)} m AOD</div>`;
                 pitDrawing.appendChild(lineRow);
+                const delta = laserDatum - level;
+                const markerDeltaHtml = showDelta
+                    ? `<div class="delta-value" style="color: ${color}; border-color: ${color};">Δ ${(delta >= 0 ? '+' : '') + delta.toFixed(3)}</div>`
+                    : `<div class="delta-value" style="color: ${color}; border-color: ${color};">LASER</div>`;
+                const markerEl = document.createElement('div');
+                markerEl.className = 'level-marker';
+                markerEl.style.color = color;
+                markerEl.style.top = `${levelToTopPx(level) - 10}px`;
+                markerEl.innerHTML = `
+                    <div class="level-line" style="background: ${color};"></div>
+                    <div>${level.toFixed(3)} m AOD</div>
+                    ${markerDeltaHtml}
+                `;
+                pitDrawing.appendChild(markerEl);
             };
 
             addComponent(
@@ -910,7 +922,7 @@
                         <div style="font-size: 10px;">(0.040m)</div>
                     </div>
                 `,
-                createLevelMarkerHtml(coverLevel, COVER_MARKER_HEX_COLOR),
+                topPx => addLevelMarker(topPx, coverLevel, COVER_MARKER_HEX_COLOR),
                 MIN_COVER_COMPONENT_HEIGHT_PX
             );
 
@@ -924,7 +936,7 @@
                         <div style="font-size: 10px;">(0.030m)</div>
                     </div>
                 `,
-                createLevelMarkerHtml(beddingLevel, BEDDING_MARKER_HEX_COLOR)
+                topPx => addLevelMarker(topPx, beddingLevel, BEDDING_MARKER_HEX_COLOR)
             );
 
             const unitsAboveDuct = Math.floor((beddingLevel - ductLevel) / STACKABOX_HEIGHT);
@@ -933,7 +945,7 @@
             for (let i = 0; i < unitsAboveDuct; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
                 const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, topPx => addLevelMarker(topPx, unitTopLevel));
             }
 
             const ductUnitTopLevel = beddingLevel - ductUnitIndex * STACKABOX_HEIGHT;
@@ -949,25 +961,21 @@
                         <div style="font-size: 9px; color: #003388; margin-top: 4px;">${ductLevel.toFixed(3)} m AOD</div>
                     </div>
                 `,
-                createLevelMarkerHtml(
-                    ductUnitTopLevel,
-                    '#667eea',
-                    `
-                        <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
-                        <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)}</div>
-                        <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${(laserDatum - ductLevel).toFixed(3)}</div>
-                    `
-                )
+                topPx => addLevelMarker(topPx, ductUnitTopLevel, '#667eea', `
+                    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed #0066CC;color:#0066CC;font-size:10px;font-weight:600;">DUCT</div>
+                    <div style="color:#0066CC;font-size:11px;">${ductLevel.toFixed(3)} m AOD</div>
+                    <div class="delta-value" style="color:#0066CC;border-color:#0066CC;">Δ ${((laserDatum - ductLevel) >= 0 ? '+' : '') + (laserDatum - ductLevel).toFixed(3)}</div>
+                `)
             );
 
             for (let i = ductUnitIndex + 1; i < numUnits; i++) {
                 const unitTopLevel = beddingLevel - i * STACKABOX_HEIGHT;
                 const unitBottomLevel = unitTopLevel - STACKABOX_HEIGHT;
-                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, createLevelMarkerHtml(unitTopLevel));
+                addComponent(unitTopLevel, unitBottomLevel, 'stackabox', `Stackabox Unit ${i + 1}`, topPx => addLevelMarker(topPx, unitTopLevel));
             }
 
-            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', createLevelMarkerHtml(sumpTopLevel));
-            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', createLevelMarkerHtml(invertLevel));
+            addComponent(sumpTopLevel, sumpBottomLevel, 'sump', 'Sump 300×300×150', topPx => addLevelMarker(topPx, sumpTopLevel));
+            addComponent(drainTopLevel, drainBottomLevel, 'drain', '100×100 Drain', topPx => addLevelMarker(topPx, invertLevel));
             addComponent(concreteTopLevel, concreteBottomLevel, 'concrete', 'C30 Concrete Base');
 
             addLevelLine('CURRENT GROUND', effectiveCurrentGroundLevel, '#228B22', true);
