@@ -14,35 +14,66 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.18), transparent 30%),
+                linear-gradient(135deg, #0f172a 0%, #1d4ed8 38%, #7c3aed 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #14213d;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 18px;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
             overflow: hidden;
+            backdrop-filter: blur(8px);
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 42%, #7c3aed 100%);
             color: white;
-            padding: 30px;
+            padding: 28px 30px 20px;
             text-align: center;
         }
         
         .header h1 {
-            font-size: 28px;
+            font-size: clamp(1.8rem, 2.4vw, 2.7rem);
             margin-bottom: 10px;
+            letter-spacing: -0.03em;
         }
         
         .header p {
             font-size: 14px;
             opacity: 0.9;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 12px;
+            line-height: 1;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.94);
         }
         
         .content {
@@ -53,10 +84,15 @@
         }
         
         .input-section {
-            background: #f8f9fa;
+            background: linear-gradient(180deg, #f8faff 0%, #f3f7ff 100%);
             padding: 25px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-radius: 14px;
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(102, 126, 234, 0.12);
+            border-left-width: 4px;
+            border-left-color: #667eea;
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.04);
         }
         
         .input-section h2 {
@@ -79,17 +115,19 @@
         
         .input-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            padding: 12px 14px;
+            border: 1px solid #d9e1f2;
+            border-radius: 10px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         }
         
         .input-group input:focus {
             outline: none;
             border-color: #667eea;
-            background: #f0f4ff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+            background: #f8faff;
         }
         
         .input-helper {
@@ -123,13 +161,17 @@
             flex: 1;
             padding: 12px 20px;
             border: none;
-            border-radius: 6px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-weight: 700;
             font-size: 13px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
         }
         
         .btn-primary {
@@ -153,11 +195,12 @@
         }
         
         .fixed-params {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 12px;
             margin-top: 15px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #e7ebf5;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
         }
         
         .fixed-params h3 {
@@ -479,12 +522,19 @@
             gap: 15px;
             margin-bottom: 25px;
         }
-        
+
         .result-card {
             background: linear-gradient(135deg, #f8f9fa 0%, #f0f4ff 100%);
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 12px;
             border-left: 4px solid #667eea;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.04);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
         }
         
         .result-card.warning {
@@ -631,7 +681,12 @@
     <div class="container">
         <div class="header">
             <h1>🏗️ Draw Pit Dip Sheet Calculator</h1>
-            <p>Professional cross-section and DIP sheet for draw pit construction (metres)</p>
+            <p>Professional cross-section and DIP sheet for draw pit construction, optimized for quick site checks and clean print-ready reporting.</p>
+            <div class="header-meta" aria-label="Calculator highlights">
+                <span class="meta-badge">📐 Site ready</span>
+                <span class="meta-badge">📄 PDF export</span>
+                <span class="meta-badge">📱 Mobile friendly</span>
+            </div>
         </div>
         
         <div class="content">
